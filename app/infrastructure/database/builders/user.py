@@ -21,9 +21,9 @@ class UserSelectBuilder(BaseSelectBuilder):
         return cls.with_get_all_where_conditions(query, **kwargs)
 
     @classmethod
-    def with_get_all_where_conditions(cls, query: Select, *, user__email: str | None = None) -> Select:
-        if user__email is not None:
-            query = query.where(UserModel.email == user__email)
+    def with_get_all_where_conditions(cls, query: Select, *, user__normal_email: str | None = None) -> Select:
+        if user__normal_email is not None:
+            query = query.where(UserModel.email == user__normal_email)
 
         return query
 

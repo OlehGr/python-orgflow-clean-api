@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from datetime import timedelta
 
 
-class IJwtService(Protocol):
+class ITokensService(Protocol):
     @abstractmethod
     def generate_access_token(self, user_id: uuid.UUID) -> str: ...
 
@@ -23,14 +23,13 @@ class IJwtService(Protocol):
     ) -> str: ...
 
     @abstractmethod
-    def verify_access_token(self, token: str, user_id: uuid.UUID) -> None: ...
+    def identify_access_token(self, token: str) -> uuid.UUID: ...
 
     @abstractmethod
-    def verify_refresh_token(self, token: str, user_id: uuid.UUID) -> None: ...
+    def identify_refresh_token(self, token: str) -> uuid.UUID: ...
 
     @abstractmethod
-    def verify_expire_token(
+    def identify_expire_token(
         self,
         token: str,
-        user_id: uuid.UUID,
-    ) -> dict[str, str] | None: ...
+    ) -> tuple[uuid.UUID, dict[str, str] | None]: ...

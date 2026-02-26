@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Активация почты</title>
+    </head>
+    <body>
+        <p>Здравствуйте, {{ name }}!</p>
+        <p>
+            Чтобы сбросить пароль перейдите по следующей ссылке по следующей
+            ссылке:<br />
+            <a href="{{ recovery_url }}">Сбросить пароль</a>
+        </p>
+        <p>
+            Если вы не пытались сбросить пароль в системе {{ base_url }}, просто
+            проигнорируйте это письмо.
+        </p>
+        <p>С уважением,<br />Ваша команда поддержки.</p>
+    </body>
+</html>

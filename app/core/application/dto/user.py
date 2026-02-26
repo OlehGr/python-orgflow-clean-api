@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, NotRequired, TypedDict
 
+import msgspec
+
 from app.core.models import EntityDto
 
 
@@ -8,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class UsersGetParams(TypedDict):
-    user__email: NotRequired[str | None]
+    user__normal_email: NotRequired[str | None]
 
 
 class UserReadDto(EntityDto, frozen=True):
@@ -25,3 +27,32 @@ class UserReadDto(EntityDto, frozen=True):
             name=user.name,
             email=user.email,
         )
+
+
+class UserSignUpDto(msgspec.Struct, frozen=True):
+    name: str
+    email: str
+    password: str
+
+
+class UserSignInDto(msgspec.Struct, frozen=True):
+    login: str
+    password: str
+
+
+class UserUpdateDto(msgspec.Struct, frozen=True):
+    name: str
+
+
+class UserEmailDto(msgspec.Struct, frozen=True):
+    email: str
+
+
+class UserPasswordRecovery(msgspec.Struct, frozen=True):
+    token: str
+    new_password: str
+
+
+class UserTokensDto(msgspec.Struct, frozen=True):
+    access: str
+    refresh: str

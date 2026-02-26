@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Unpack
 
 from app.core.application.interfaces.repository.user import IUserRepository
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from app.core.models.user import UserModel
     from app.infrastructure.database.internal.transaction import TransactionManager
 
-
+@dataclass
 class UserRepository(IUserRepository):
     _tm: TransactionManager
 

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Активация почты</title>
+    </head>
+    <body>
+        <p>Здравствуйте, {{ username }}!</p>
+        <p>
+            Чтобы подтвердить ваш адрес электронную почту, пожалуйста, перейдите
+            по следующей ссылке:<br />
+            <a href="{{ confirmation_url }}">Подтвердить почту</a>
+        </p>
+        <p>
+            Если вы не регистрировались на {{ base_url }}, просто проигнорируйте
+            это письмо.
+        </p>
+        <p>С уважением,<br />Ваша команда поддержки.</p>
+    </body>
+</html>

@@ -1,16 +1,13 @@
 import enum
+import uuid
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import Any, ClassVar
 
 from jose import JWTError, jwt
 
-from app.core.application.interfaces.services.jwt import IJwtService
+from app.core.application.interfaces.services.tokens import ITokensService
 from app.core.config import env_config
 from app.core.exceptions.auth import UnauthorizedError
-
-
-if TYPE_CHECKING:
-    import uuid
 
 
 class TokenType(enum.StrEnum):
@@ -19,7 +16,7 @@ class TokenType(enum.StrEnum):
     EXPIRE = "EXPIRE"
 
 
-class JwtService(IJwtService):
+class JwtService(ITokensService):
     ALGORITHM: ClassVar[str] = "HS256"
     TIME_DELTA_ACCESS: ClassVar[timedelta] = timedelta(minutes=env_config.access_token_minutes)
     TIME_DELTA_REFRESH: ClassVar[timedelta] = timedelta(days=env_config.refresh_token_days)
@@ -66,30 +63,32 @@ class JwtService(IJwtService):
             algorithm=self.ALGORITHM,
         )
 
-    def verify_access_token(self, token: str, user_id: uuid.UUID) -> None:
-        self._verify_token(token, user_id, TokenType.ACCESS)
+    def identify_access_token(self, token: str) -> uuid.UUID:
+        payload = self._identify_token(token, TokenType.ACCESS)
+        return uuid.UUID(payload["sub"])
 
-    def verify_refresh_token(self, token: str, user_id: uuid.UUID) -> None:
-        self._verify_token(token, user_id, TokenType.REFRESH)
+    def identify_refresh_token(self, token: str) -> uuid.UUID:
+        payload = self._identify_token(token, TokenType.REFRESH)
+        return uuid.UUID(payload["sub"])
 
-    def verify_expire_token(self, token: str, user_id: uuid.UUID) -> dict[str, str] | None:
-        payload = self._verify_token(token, user_id, TokenType.EXPIRE)
+    def identify_expire_token(self, token: str) -> tuple[uuid.UUID, dict[str, str] | None]:
+        payload = self._identify_token(token, TokenType.EXPIRE)
 
         if "data" not in payload or not isinstance(payload["data"], dict):
             raise UnauthorizedError("Невалидный токен")
 
-        return payload["data"]
+        return uuid.UUID(payload["sub"]), payload["data"]
 
-    def _verify_token(self, token: str, user_id: uuid.UUID, type_: TokenType) -> dict[str, str]:
+    def _identify_token(self, token: str, type_: TokenType) -> dict[str, str]:
         try:
             payload = jwt.decode(token=token, key=env_config.secret_key, algorithms=[self.ALGORITHM])
-            self._verify_token_payload(payload, user_id, type_)
+            self._verify_token_payload(payload, type_)
         except (ValueError, KeyError, JWTError) as e:
             raise UnauthorizedError("Невалидный токен") from e
         else:
             return payload
 
-    def _verify_token_payload(self, payload: dict[str, Any], user_id: uuid.UUID, type_: TokenType) -> dict[str, Any]:
-        if payload["token_type"] != type_ or payload["sub"] != str(user_id):
+    def _verify_token_payload(self, payload: dict[str, Any], type_: TokenType) -> dict[str, Any]:
+        if payload["token_type"] != type_ or not payload["sub"]:
             raise ValueError("Невалидный токен")
         return payload

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Unpack
 
 from sqlalchemy import select
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
     from app.infrastructure.database.internal.transaction import TransactionManager
 
 
+@dataclass
 class UserProjection(IUserProjection):
     _tm: TransactionManager
 
