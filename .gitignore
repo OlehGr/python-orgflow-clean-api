@@ -5,6 +5,16 @@ build/
 dist/
 wheels/
 *.egg-info
+*_cache
+
+# IDE
+.DS_Store
+.idea
+.vscode
+
 
 # Virtual environments
 .venv
+
+# Private
+.env

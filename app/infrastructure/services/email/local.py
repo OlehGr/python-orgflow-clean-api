@@ -20,11 +20,14 @@ class EmailLoggerService(IEmailService):
         init=False,
     )
 
+    confirmation_url = field(default_factory=lambda: f"{env_config.base_url}/confirm", init=False)
+    recovery_url = field(default_factory=lambda: f"{env_config.base_url}/recovery-password", init=False)
+
     async def send_confirmation_email(self, *, email: str, username: str, token: str) -> None:
         template = self.templates.get_template("confirmation.html")
 
         html_body = template.render(
-            username=username, confirmation_url=f"{env_config.confirmation_url}/?{token}", base_url=env_config.base_url
+            username=username, confirmation_url=f"{self.confirmation_url}/?{token}", base_url=env_config.base_url
         )
 
         await self._send_email(email=email, subject="Активация аккаунта", body=html_body)
@@ -33,7 +36,7 @@ class EmailLoggerService(IEmailService):
         template = self.templates.get_template("recovery.html")
 
         html_body = template.render(
-            name=username, recovery_url=f"{env_config.recovery_url}/?token={token}", base_url=env_config.base_url
+            name=username, recovery_url=f"{self.recovery_url}/?token={token}", base_url=env_config.base_url
         )
 
         await self._send_email(email=email, subject="Восстановление пароля", body=html_body)
