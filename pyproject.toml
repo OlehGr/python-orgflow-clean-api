@@ -1,0 +1,94 @@
+[project]
+name = "stt-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiobotocore>=3.1.3",
+    "aiohttp>=3.13.3",
+    "aiosmtplib>=5.1.0",
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "dishka>=1.8.0",
+    "dynaconf>=3.2.12",
+    "faststream[cli]>=0.6.6",
+    "granian>=2.7.1",
+    "jinja2>=3.1.6",
+    "litestar[jwt]>=2.21.0",
+    "msgspec>=0.20.0",
+    "pytest>=9.0.2",
+    "python-jose>=3.5.0",
+    "sqlalchemy>=2.0.46",
+    "structlog>=25.5.0",
+    "types-aiobotocore>=3.1.3",
+    "types-aiobotocore-s3>=3.1.3",
+    "uvicorn>=0.41.0",
+    "uvloop>=0.22.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.2",
+    "ty>=0.0.18",
+]
+
+
+
+[tool.ruff]
+fix = true
+unsafe-fixes = true
+line-length = 120
+target-version = "py314"
+extend-exclude = ["bin"]
+exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ['ALL']
+ignore = [
+    "EM",
+    "FBT",
+    "TRY003",
+    "D1",
+    "D203",
+    "D213",
+    "G004",
+    "FA",
+    "COM812",
+    "ISC001",
+    "PLR0913",
+    "A005",
+    "S104",
+    "DTZ005",
+    "B008",
+    "B904",
+    "UP007",
+    "RUF006",
+    'PGH003',
+    "C901",
+    "PLR0912",
+    "RUF001",
+    "DTZ003",
+    "BLE001",
+    "PLR0915",
+    "PLR0911",
+    "ANN003",
+    "ANN002",
+    "ANN001",
+]
+isort.lines-after-imports = 2
+isort.no-lines-before = ["standard-library", "local-folder"]
+
+
+
+[tool.ty.src]
+exclude = [
+    "**/migrations",
+]
+
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "-q"]
+testpaths = [
+    "tests/*",
+]
