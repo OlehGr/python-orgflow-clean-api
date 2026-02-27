@@ -1,12 +1,9 @@
+import uuid
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Protocol, Unpack
+from typing import Protocol, Unpack
 
-
-if TYPE_CHECKING:
-    import uuid
-
-    from app.core.application.dto.base import Paged, Paginated
-    from app.core.application.dto.user import UserReadDto, UsersGetParams
+from app.core.application.dto.base import Paged, Paginated
+from app.core.application.dto.user import UserReadDto, UsersGetParams
 
 
 class IUserProjection(Protocol):

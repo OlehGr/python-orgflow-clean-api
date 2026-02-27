@@ -1,15 +1,12 @@
-from typing import TYPE_CHECKING, Unpack
+import uuid
+from typing import Unpack
 
 from sqlalchemy import Select, select
 
+from app.core.application.dto.user import UsersGetParams
 from app.core.models import UserModel
 from app.infrastructure.database.builders.base import BaseSelectBuilder
 
-
-if TYPE_CHECKING:
-    import uuid
-
-    from app.core.application.dto.user import UsersGetParams
 
 SelectUserModel = Select[tuple[UserModel]]
 

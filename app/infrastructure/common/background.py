@@ -1,11 +1,7 @@
 import asyncio
-from typing import TYPE_CHECKING
+from collections.abc import Coroutine
 
 from app.core.application.interfaces.common.background import IBackgroundExecutor
-
-
-if TYPE_CHECKING:
-    from collections.abc import Coroutine
 
 
 class BackgroundExecutor(IBackgroundExecutor):

@@ -1,9 +1,6 @@
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Protocol
-
-
-if TYPE_CHECKING:
-    from collections.abc import Coroutine
+from collections.abc import Coroutine
+from typing import Protocol
 
 
 class IBackgroundExecutor(Protocol):

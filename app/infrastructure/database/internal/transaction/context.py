@@ -1,15 +1,10 @@
 import asyncio
-import contextlib
-from typing import TYPE_CHECKING
+from weakref import WeakKeyDictionary
 
-
-if TYPE_CHECKING:
-    from weakref import WeakKeyDictionary
-
-    from .session import (
-        TransactionalSession,
-        TransactionalSessionFactory,
-    )
+from .session import (
+    TransactionalSession,
+    TransactionalSessionFactory,
+)
 
 
 def _get_current_task() -> asyncio.Task:
@@ -46,7 +41,6 @@ class _BaseSessionContext:
 
         self._session = self._session_factory()
         self._task_sessions[task] = self._session
-        task.add_done_callback(self._on_task_done)
 
         return self._session
 
@@ -70,10 +64,6 @@ class _BaseSessionContext:
                 self._session.clear_after_commit_callbacks()
         finally:
             self._task_sessions.pop(task, None)
-
-    def _on_task_done(self, task: asyncio.Task) -> None:
-        with contextlib.suppress(RuntimeError):
-            self._task_sessions.pop(task)
 
 
 class TransactionContext(_BaseSessionContext):

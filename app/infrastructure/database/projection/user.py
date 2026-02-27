@@ -1,22 +1,18 @@
+import uuid
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Unpack
+from typing import Unpack
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.application.dto.base import Paged, Paginated
 from app.core.application.dto.user import UserReadDto, UsersGetParams
 from app.core.application.interfaces.projection.user import IUserProjection
+from app.core.exceptions.entity import EntityNotFoundError
 from app.core.models import UserModel
 from app.infrastructure.database.builders.user import UserSelectBuilder
 from app.infrastructure.database.helpers.data import DataLoadHelper
-
-
-if TYPE_CHECKING:
-    import uuid
-
-    from sqlalchemy.ext.asyncio import AsyncSession
-
-    from app.infrastructure.database.internal.transaction import TransactionManager
+from app.infrastructure.database.internal.transaction import TransactionManager
 
 
 @dataclass
@@ -48,7 +44,14 @@ class UserProjection(IUserProjection):
             return Paginated.to_paginated(reads, page=page, limit=limit, count=count)
 
     async def get_by_id(self, user_id: uuid.UUID) -> UserReadDto:
-        return await super().get_by_id(user_id)
+        query = UserSelectBuilder.build_get_by_id_select(user_id)
+
+        async with self._tm.session() as session:
+            entities = await DataLoadHelper.load_models_list(query, session)
+            reads = await self._load_reads_from_models(entities, session)
+            if not reads:
+                raise EntityNotFoundError("User")
+            return reads[0]
 
     async def _load_reads_from_models(self, users: list[UserModel], _session: AsyncSession) -> list[UserReadDto]:
         return [UserReadDto.from_user(user) for user in users]

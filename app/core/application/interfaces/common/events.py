@@ -1,11 +1,8 @@
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Protocol
+from collections.abc import Callable, Coroutine
+from typing import Protocol
 
-
-if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
-
-    from app.core.models.event import EntityEvent, EntityEventSubject
+from app.core.models.event import EntityEvent, EntityEventSubject
 
 
 class IEntityEventBus(Protocol):

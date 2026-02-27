@@ -14,7 +14,7 @@ class Paginated[ItemDto](msgspec.Struct, frozen=True):
     pages: int
 
     @classmethod
-    def to_paginated(cls, data: list[ItemDto], *, page: int, limit: int | None, count: int) -> Paginated[ItemDto]:
+    def to_paginated(cls, data: list[ItemDto], *, page: int, limit: int | None, count: int) -> "Paginated[ItemDto]":
         if limit is None:
             return cls(
                 next=None,
@@ -36,7 +36,7 @@ class Paginated[ItemDto](msgspec.Struct, frozen=True):
         )
 
     @classmethod
-    def from_paginated(cls, data: list[ItemDto], paginated: Paginated) -> Paginated[ItemDto]:
+    def from_paginated(cls, data: list[ItemDto], paginated: "Paginated") -> "Paginated[ItemDto]":
         return cls(
             next=paginated.next,
             prev=paginated.prev,
@@ -51,7 +51,7 @@ class Paged[ItemDto](msgspec.Struct, frozen=True):
     prev: int | None
 
     @classmethod
-    def to_paged(cls, over_data: list[ItemDto], *, page: int, limit: int | None) -> Paged[ItemDto]:
+    def to_paged(cls, over_data: list[ItemDto], *, page: int, limit: int | None) -> "Paged[ItemDto]":
         if limit is None:
             return cls(
                 next=None,

@@ -1,22 +1,23 @@
+import uuid
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import TYPE_CHECKING
 
-from app.core.application.dto.user import UserEmailDto, UserPasswordRecovery, UserTokensDto
+from app.core.application.dto.user import (
+    UserEmailDto,
+    UserPasswordRecovery,
+    UserSignInDto,
+    UserSignUpDto,
+    UserTokensDto,
+    UserUpdateDto,
+)
+from app.core.application.interfaces.common.background import IBackgroundExecutor
+from app.core.application.interfaces.repository.user import IUserRepository
+from app.core.application.interfaces.services.email import IEmailService
+from app.core.application.interfaces.services.tokens import ITokensService
 from app.core.exceptions.auth import UnauthorizedError
 from app.core.exceptions.entity import EntityNotFoundError
 from app.core.exceptions.validation import InvalidCaseError
 from app.core.models import UserModel
-
-
-if TYPE_CHECKING:
-    import uuid
-
-    from app.core.application.dto.user import UserSignInDto, UserSignUpDto
-    from app.core.application.interfaces.common.background import IBackgroundExecutor
-    from app.core.application.interfaces.repository.user import IUserRepository
-    from app.core.application.interfaces.services.email import IEmailService
-    from app.core.application.interfaces.services.tokens import ITokensService
 
 
 @dataclass
@@ -26,6 +27,12 @@ class UserService:
     _tokens_service: ITokensService
     _email_service: IEmailService
     _background_executor: IBackgroundExecutor
+
+    async def update_user(self, user_id: uuid.UUID, data: UserUpdateDto) -> uuid.UUID:
+        user = await self._user_repository.get_by_id(user_id)
+        user.update(name=data.name)
+        await self._user_repository.save(user)
+        return user.id
 
     async def sign_up_user(self, data: UserSignUpDto) -> uuid.UUID:
         normal_email = UserModel.normalize_email(data.email)
@@ -115,28 +122,13 @@ class UserService:
 
         await self._user_repository.save(user)
 
-    async def refresh_authorize(self, refresh_token: str) -> UserTokensDto:
-        user_id = self._tokens_service.identify_refresh_token(refresh_token)
-
-        try:
-            user = await self._user_repository.get_by_id(user_id)
-        except EntityNotFoundError as e:
-            raise UnauthorizedError("Пользователь не найден") from e
-
-        access_token = self._tokens_service.generate_access_token(user.id)
-
-        return UserTokensDto(access=access_token, refresh=refresh_token)
-
-    async def authorize(self, access_token: str) -> uuid.UUID:
-        return self._tokens_service.identify_access_token(access_token)
-
     def _generate_tokens_for_user(self, user: UserModel) -> UserTokensDto:
         access = self._tokens_service.generate_access_token(user.id)
         refresh = self._tokens_service.generate_refresh_token(user.id)
 
         return UserTokensDto(access=access, refresh=refresh)
 
-    async def _public_email_confirmation_for_user(self, user: UserModel) -> None:
+    def _public_email_confirmation_for_user(self, user: UserModel) -> None:
         expire_token = self._tokens_service.generate_expire_token(user.id, timedelta(days=356))
 
         self._background_executor.submit(

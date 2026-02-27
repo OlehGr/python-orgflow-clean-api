@@ -1,12 +1,8 @@
-from typing import TYPE_CHECKING
+from collections.abc import Awaitable, Callable
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.application.interfaces.managers.transaction import ITransactionalSession
-
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
 
 
 class TransactionalSession(AsyncSession, ITransactionalSession):

@@ -1,9 +1,9 @@
 [project]
-name = "stt-api"
+name = "some-api"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "aiobotocore>=3.1.3",
     "aiohttp>=3.13.3",
@@ -40,7 +40,6 @@ dev = [
 fix = true
 unsafe-fixes = true
 line-length = 120
-target-version = "py314"
 extend-exclude = ["bin"]
 exclude = ["migrations"]
 
@@ -76,10 +75,13 @@ ignore = [
     "ANN003",
     "ANN002",
     "ANN001",
+    "TC003",
+    "TC002",
+    "TC001",
+    "CPY001"
 ]
 isort.lines-after-imports = 2
 isort.no-lines-before = ["standard-library", "local-folder"]
-
 
 
 [tool.ty.src]

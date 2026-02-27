@@ -7,6 +7,10 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, registry
 
 
+def get_native_utc_now() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
 mapper_registry = registry(metadata=MetaData())
 
 
@@ -29,7 +33,7 @@ class EntityModel(IdModel):
     is_removed: Mapped[bool] = mapped_column(index=True)
 
     created_at: Mapped[datetime] = mapped_column(index=True)
-    updated_at: Mapped[datetime] = mapped_column(index=True, onupdate="get_native_utc_now")
+    updated_at: Mapped[datetime] = mapped_column(index=True, onupdate=get_native_utc_now)
 
     @classmethod
     def _generate_base_args(cls) -> dict[str, Any]:
@@ -39,10 +43,6 @@ class EntityModel(IdModel):
             "created_at": get_native_utc_now(),
             "updated_at": get_native_utc_now(),
         }
-
-
-def get_native_utc_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class IdDto(msgspec.Struct, frozen=True):

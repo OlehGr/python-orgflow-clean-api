@@ -1,14 +1,10 @@
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
+from app.core.application.interfaces.common.background import IBackgroundExecutor
 from app.core.application.interfaces.common.events import IEntityEventBus
-
-
-if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
-
-    from app.core.application.interfaces.common.background import IBackgroundExecutor
-    from app.core.models.event import EntityEvent, EntityEventSubject
+from app.core.models.event import EntityEvent, EntityEventSubject
 
 
 AllSubjects = Literal["ALL_SUBJECTS"]
@@ -16,9 +12,7 @@ AllSubjects = Literal["ALL_SUBJECTS"]
 
 @dataclass
 class InMemoryEventBus(IEntityEventBus):
-    _handlers: dict[
-        EntityEventSubject | AllSubjects, list[Callable[[EntityEvent], Coroutine]]
-    ]
+    _handlers: dict[EntityEventSubject | AllSubjects, list[Callable[[EntityEvent], Coroutine]]]
     _background_executor: IBackgroundExecutor
 
     def __init__(self, background_executor: IBackgroundExecutor) -> None:

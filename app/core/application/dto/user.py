@@ -1,12 +1,8 @@
-from typing import TYPE_CHECKING, NotRequired, TypedDict
+from typing import NotRequired, TypedDict
 
 import msgspec
 
-from app.core.models import EntityDto
-
-
-if TYPE_CHECKING:
-    from app.core.models import UserModel
+from app.core.models import EntityDto, UserModel
 
 
 class UsersGetParams(TypedDict):
@@ -18,7 +14,7 @@ class UserReadDto(EntityDto, frozen=True):
     email: str
 
     @classmethod
-    def from_user(cls, user: UserModel) -> UserReadDto:
+    def from_user(cls, user: UserModel) -> "UserReadDto":
         return cls(
             id=user.id,
             created_at=user.created_at,
@@ -56,3 +52,11 @@ class UserPasswordRecovery(msgspec.Struct, frozen=True):
 class UserTokensDto(msgspec.Struct, frozen=True):
     access: str
     refresh: str
+
+
+class UserRefreshTokenDto(msgspec.Struct, frozen=True):
+    refresh: str
+
+
+class UserTokenDto(msgspec.Struct, frozen=True):
+    token: str

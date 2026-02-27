@@ -1,12 +1,10 @@
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
 
 from sqlalchemy import Select, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import BaseModel
 
-
-if TYPE_CHECKING:
-    from sqlalchemy.ext.asyncio import AsyncSession
 
 TModel = TypeVar("TModel", bound=BaseModel)
 

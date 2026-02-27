@@ -15,16 +15,19 @@ class UserModel(EntityModel):
     password_hash: Mapped[str]
 
     @classmethod
-    def create(cls, *, name: str, email: str, password: str) -> UserModel:
+    def create(cls, *, name: str, email: str, password: str) -> "UserModel":
         password_hash = cls.hash_password(password)
         return cls(
-            *cls._generate_base_args(),
+            **cls._generate_base_args(),
             name=name,
             email=email,
             password_hash=password_hash,
             is_confirmed=False,
             is_active=True,
         )
+
+    def update(self, *, name: str) -> None:
+        self.name = name
 
     def confirm_user_email(self, email: str | None = None) -> None:
         self.is_confirmed = True

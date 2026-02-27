@@ -20,8 +20,8 @@ class EmailLoggerService(IEmailService):
         init=False,
     )
 
-    confirmation_url = field(default_factory=lambda: f"{env_config.base_url}/confirm", init=False)
-    recovery_url = field(default_factory=lambda: f"{env_config.base_url}/recovery-password", init=False)
+    confirmation_url: str = field(default_factory=lambda: f"{env_config.base_url}/confirm", init=False)
+    recovery_url: str = field(default_factory=lambda: f"{env_config.base_url}/recovery-password", init=False)
 
     async def send_confirmation_email(self, *, email: str, username: str, token: str) -> None:
         template = self.templates.get_template("confirmation.html")

@@ -25,7 +25,6 @@ class JwtService(ITokensService):
         return jwt.encode(
             {
                 "token_type": TokenType.ACCESS,
-                "user_id": user_id,
                 "exp": datetime.now(tz=UTC) + self.TIME_DELTA_ACCESS,
                 "iat": datetime.now(tz=UTC),
                 "sub": str(user_id),
@@ -38,7 +37,6 @@ class JwtService(ITokensService):
         return jwt.encode(
             {
                 "token_type": TokenType.REFRESH,
-                "user_id": user_id,
                 "exp": datetime.now(tz=UTC) + self.TIME_DELTA_REFRESH,
                 "iat": datetime.now(tz=UTC),
                 "sub": str(user_id),
@@ -53,7 +51,6 @@ class JwtService(ITokensService):
         return jwt.encode(
             {
                 "token_type": TokenType.EXPIRE,
-                "user_id": user_id,
                 "exp": datetime.now(tz=UTC) + expiration,
                 "iat": datetime.now(tz=UTC),
                 "sub": str(user_id),
@@ -74,10 +71,12 @@ class JwtService(ITokensService):
     def identify_expire_token(self, token: str) -> tuple[uuid.UUID, dict[str, str] | None]:
         payload = self._identify_token(token, TokenType.EXPIRE)
 
-        if "data" not in payload or not isinstance(payload["data"], dict):
-            raise UnauthorizedError("Невалидный токен")
+        payload_data: dict[str, str] | None = None
 
-        return uuid.UUID(payload["sub"]), payload["data"]
+        if "data" in payload and isinstance(payload["data"], dict):
+            payload_data = payload["data"]
+
+        return uuid.UUID(payload["sub"]), payload_data
 
     def _identify_token(self, token: str, type_: TokenType) -> dict[str, str]:
         try:

@@ -1,10 +1,7 @@
+import uuid
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Protocol
-
-
-if TYPE_CHECKING:
-    import uuid
-    from datetime import timedelta
+from datetime import timedelta
+from typing import Protocol
 
 
 class ITokensService(Protocol):

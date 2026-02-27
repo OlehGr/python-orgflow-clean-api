@@ -1,12 +1,9 @@
+import uuid
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Protocol, Unpack
+from typing import Protocol, Unpack
 
-
-if TYPE_CHECKING:
-    import uuid
-
-    from app.core.application.dto.user import UsersGetParams
-    from app.core.models.user import UserModel
+from app.core.application.dto.user import UsersGetParams
+from app.core.models.user import UserModel
 
 
 class IUserRepository(Protocol):
