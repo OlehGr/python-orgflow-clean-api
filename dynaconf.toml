@@ -1,8 +1,0 @@
-[default]
-access_token_minutes=15
-refresh_token_days=60
-debug=false
-db_pool_size=5
-db_max_overflow=5
-app_workers=1
-worker_threads=1

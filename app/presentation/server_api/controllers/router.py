@@ -1,6 +1,8 @@
 from litestar import Router
+from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
 
-from app.presentation.shared.litestar.errors import internal_error_handler
+from app.core.exceptions.base import BasicMessageError
+from app.presentation.shared.litestar.errors import internal_error_handler, message_error_handler
 from .v1.auth import AuthController
 from .v1.user import UserController
 
@@ -8,5 +10,8 @@ from .v1.user import UserController
 app_api_router = Router(
     path="/api/v1",
     route_handlers=[AuthController, UserController],
-    exception_handlers={Exception: internal_error_handler},
+    exception_handlers={
+        BasicMessageError: message_error_handler,
+        HTTP_500_INTERNAL_SERVER_ERROR: internal_error_handler,
+    },
 )

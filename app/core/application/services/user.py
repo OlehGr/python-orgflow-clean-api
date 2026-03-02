@@ -46,7 +46,7 @@ class UserService:
 
         await self._user_repository.save(user)
 
-        self._public_email_confirmation_for_user(user)
+        await self._public_email_confirmation_for_user(user)
 
         return user.id
 
@@ -128,7 +128,7 @@ class UserService:
 
         return UserTokensDto(access=access, refresh=refresh)
 
-    def _public_email_confirmation_for_user(self, user: UserModel) -> None:
+    async def _public_email_confirmation_for_user(self, user: UserModel) -> None:
         expire_token = self._tokens_service.generate_expire_token(user.id, timedelta(days=356))
 
         self._background_executor.submit(

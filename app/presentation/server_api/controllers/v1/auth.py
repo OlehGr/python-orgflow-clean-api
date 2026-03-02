@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
 from dishka.integrations.litestar import FromDishka, inject
-from litestar import Controller, Request, post
+from litestar import Controller, post
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.core.application.dto.user import (
@@ -58,11 +58,3 @@ class AuthController(Controller):
     ) -> MessageResultDto:
         await user_service.recovery_user_password(data)
         return MessageResultDto("Пароль успешно изменен")
-
-    @post("/request-email-change", status_code=HTTP_200_OK)
-    @inject
-    async def request_email_change(
-        self, user_service: FromDishka[UserService], request: Request, data: UserEmailDto
-    ) -> MessageResultDto:
-        await user_service.request_email_change(data, user_id=request.user)
-        return MessageResultDto("Вам отправлено письмо с подтверждением")

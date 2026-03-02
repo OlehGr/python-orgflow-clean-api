@@ -2,6 +2,7 @@ import bcrypt
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.exceptions.validation import InvalidCaseError
+from app.core.models import EntityDto
 from app.core.models.base import EntityModel
 
 
@@ -57,3 +58,25 @@ class UserModel(EntityModel):
     @classmethod
     def normalize_email(cls, email: str) -> str:
         return email.lower()
+
+
+class UserEventDto(EntityDto, frozen=True):
+    name: str
+    email: str
+    is_confirmed: bool
+    is_active: bool
+    password_hash: str
+
+    @classmethod
+    def from_user(cls, user: UserModel) -> "UserEventDto":
+        return cls(
+            id=user.id,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+            is_removed=user.is_removed,
+            is_active=user.is_active,
+            is_confirmed=user.is_confirmed,
+            password_hash=user.password_hash,
+            name=user.name,
+            email=user.email,
+        )

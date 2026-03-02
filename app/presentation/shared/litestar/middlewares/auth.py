@@ -1,8 +1,9 @@
-from app.core.application.services.auth import AuthService
 from litestar.connection import ASGIConnection
-from litestar.exceptions import NotAuthorizedException
 from litestar.middleware import AbstractAuthenticationMiddleware, DefineMiddleware
 from litestar.middleware.authentication import AuthenticationResult
+
+from app.core.application.services.auth import AuthService
+from app.core.exceptions.auth import UnauthorizedError
 
 
 class _TokenMiddlewareAuthentication(AbstractAuthenticationMiddleware):
@@ -13,7 +14,7 @@ class _TokenMiddlewareAuthentication(AbstractAuthenticationMiddleware):
         auth_header = connection.headers.get("Authorization")
         if not auth_header:
             msg = "No JWT token found in request header"
-            raise NotAuthorizedException(msg)
+            raise UnauthorizedError(msg)
 
         encoded_token = auth_header.partition(" ")[-1]
 
@@ -29,11 +30,6 @@ token_auth_middleware = DefineMiddleware(
     exclude=[
         "docs",
         "/v1/external",
-        "/v1/auth/sign-in",
-        "/v1/auth/sign-up",
-        "/v1/auth/confirm",
-        "/v1/auth/refresh",
-        "/v1/auth/recovery-password",
-        "/v1/auth/request-password-recovery",
+        "/v1/auth",
     ],
 )
