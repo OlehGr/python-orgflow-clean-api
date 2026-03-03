@@ -1,4 +1,7 @@
+import uuid
+
 import bcrypt
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.exceptions.validation import InvalidCaseError
@@ -14,6 +17,10 @@ class UserModel(EntityModel):
     is_confirmed: Mapped[bool]
     is_active: Mapped[bool]
     password_hash: Mapped[str]
+
+    avatar_file_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("file.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     @classmethod
     def create(cls, *, name: str, email: str, password: str) -> "UserModel":
@@ -55,9 +62,14 @@ class UserModel(EntityModel):
     def can_sign_in(self) -> bool:
         return self.is_active and self.is_confirmed
 
-    @classmethod
-    def normalize_email(cls, email: str) -> str:
+    @staticmethod
+    def normalize_email(email: str) -> str:
         return email.lower()
+
+    @staticmethod
+    def validate_avatar_content_type(content_type: str) -> None:
+        if not content_type.lower().startswith("image/"):
+            raise InvalidCaseError("Аватар пользователя должна быть картинка")
 
 
 class UserEventDto(EntityDto, frozen=True):
@@ -66,6 +78,7 @@ class UserEventDto(EntityDto, frozen=True):
     is_confirmed: bool
     is_active: bool
     password_hash: str
+    avatar_file_id: uuid.UUID | None
 
     @classmethod
     def from_user(cls, user: UserModel) -> "UserEventDto":
@@ -79,4 +92,5 @@ class UserEventDto(EntityDto, frozen=True):
             password_hash=user.password_hash,
             name=user.name,
             email=user.email,
+            avatar_file_id=user.avatar_file_id,
         )

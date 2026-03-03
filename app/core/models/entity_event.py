@@ -16,10 +16,12 @@ EntityEventAllSubjects = Literal["*"]
 
 class EntityEventSubject(enum.StrEnum):
     user_save = "user_save"
+    file_save = "file_save"
 
 
 class EntityEventEntity(enum.StrEnum):
     user = "user"
+    file = "file"
 
 
 TEntity = TypeVar("TEntity", bound=IdDto, default=IdDto)
@@ -50,6 +52,7 @@ class EntityEventModel(IdModel):
     @classmethod
     def create(
         cls,
+        *,
         subject: EntityEventSubject,
         entity_id: uuid.UUID,
         entity: EntityEventEntity,

@@ -3,8 +3,10 @@ from collections.abc import Sequence
 from dishka import FromDishka
 from dishka.integrations.litestar import inject
 from litestar import Controller, Request, get, post, put
+from litestar.params import Parameter
 from litestar.status_codes import HTTP_200_OK
 
+from app.core.application.dto.file import FileCreateStreamData
 from app.core.application.dto.user import UserEmailDto, UserReadDto, UserUpdateDto
 from app.core.application.interfaces.projection.user import IUserProjection
 from app.core.application.services.user import UserService
@@ -37,5 +39,28 @@ class UserController(Controller):
         request: Request,
         data: UserUpdateDto,
     ) -> UserReadDto:
-        user_id = await user_service.update_user(request.user, data)
+        user_id = request.user
+        await user_service.update_user(user_id, data)
+        return await user_projection.get_by_id(user_id)
+
+    @put("/me/avatar", status_code=HTTP_200_OK)
+    @inject
+    async def update_me_avatar(
+        self,
+        user_service: FromDishka[UserService],
+        user_projection: FromDishka[IUserProjection],
+        request: Request,
+        filename: str = Parameter(required=True),
+    ) -> UserReadDto:
+        content_type = request.headers.get("content-type", "application/octet-stream")
+
+        user_id = request.user
+        await user_service.update_user_avatar(
+            user_id,
+            FileCreateStreamData(
+                name=filename,
+                content_type=content_type,
+                file_stream=request.stream(),
+            ),
+        )
         return await user_projection.get_by_id(user_id)

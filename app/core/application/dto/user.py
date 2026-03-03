@@ -1,8 +1,8 @@
-from typing import NotRequired, TypedDict
+from typing import NotRequired, Optional, TypedDict
 
 import msgspec
 
-from app.core.models import EntityDto, UserModel
+from app.core.models import EntityDto, FileModel, UserModel
 
 
 class UsersGetParams(TypedDict):
@@ -12,9 +12,10 @@ class UsersGetParams(TypedDict):
 class UserReadDto(EntityDto, frozen=True):
     name: str
     email: str
+    avatar: Optional["UserAvatarReadDto"]
 
     @classmethod
-    def from_user(cls, user: UserModel) -> "UserReadDto":
+    def from_user(cls, user: UserModel, avatar: Optional["UserAvatarReadDto"]) -> "UserReadDto":
         return cls(
             id=user.id,
             created_at=user.created_at,
@@ -22,6 +23,17 @@ class UserReadDto(EntityDto, frozen=True):
             is_removed=user.is_removed,
             name=user.name,
             email=user.email,
+            avatar=avatar,
+        )
+
+
+class UserAvatarReadDto(EntityDto, frozen=True):
+    url: str
+
+    @classmethod
+    def from_file(cls, file: FileModel) -> "UserAvatarReadDto":
+        return cls(
+            id=file.id, created_at=file.created_at, updated_at=file.updated_at, is_removed=file.is_removed, url=file.url
         )
 
 

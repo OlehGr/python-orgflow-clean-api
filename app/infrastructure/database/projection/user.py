@@ -12,6 +12,7 @@ from app.core.exceptions.entity import EntityNotFoundError
 from app.core.models import UserModel
 from app.infrastructure.database.builders.user import UserSelectBuilder
 from app.infrastructure.database.helpers.data import DataLoadHelper
+from app.infrastructure.database.helpers.entity import EntitiesLoadHelper
 from app.infrastructure.database.internal.transaction import TransactionManager
 
 
@@ -53,5 +54,15 @@ class UserProjection(IUserProjection):
                 raise EntityNotFoundError("User")
             return reads[0]
 
-    async def _load_reads_from_models(self, users: list[UserModel], _session: AsyncSession) -> list[UserReadDto]:
-        return [UserReadDto.from_user(user) for user in users]
+    async def _load_reads_from_models(self, users: list[UserModel], session: AsyncSession) -> list[UserReadDto]:
+
+        user_avatar_reads_map = await EntitiesLoadHelper.load_user_avatar_reads_map(
+            {user.avatar_file_id for user in users if user.avatar_file_id}, session
+        )
+
+        return [
+            UserReadDto.from_user(
+                user, avatar=user_avatar_reads_map[user.avatar_file_id] if user.avatar_file_id else None
+            )
+            for user in users
+        ]

@@ -2,6 +2,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 
+from app.core.application.dto.file import FileCreateStreamData
 from app.core.application.dto.user import (
     UserEmailDto,
     UserPasswordRecovery,
@@ -11,9 +12,11 @@ from app.core.application.dto.user import (
     UserUpdateDto,
 )
 from app.core.application.interfaces.common.background import IBackgroundExecutor
+from app.core.application.interfaces.managers.transaction import ITransactionManager
 from app.core.application.interfaces.repository.user import IUserRepository
 from app.core.application.interfaces.services.email import IEmailService
 from app.core.application.interfaces.services.tokens import ITokensService
+from app.core.application.services.file import FileService
 from app.core.exceptions.auth import UnauthorizedError
 from app.core.exceptions.entity import EntityNotFoundError
 from app.core.exceptions.validation import InvalidCaseError
@@ -22,17 +25,29 @@ from app.core.models import UserModel
 
 @dataclass
 class UserService:
+    _tm: ITransactionManager
+
     _user_repository: IUserRepository
 
     _tokens_service: ITokensService
     _email_service: IEmailService
     _background_executor: IBackgroundExecutor
 
-    async def update_user(self, user_id: uuid.UUID, data: UserUpdateDto) -> uuid.UUID:
+    _file_service: FileService
+
+    async def update_user_avatar(self, user_id: uuid.UUID, image_file_data: FileCreateStreamData) -> None:
+        user = await self._user_repository.get_by_id(user_id)
+        user.validate_avatar_content_type(image_file_data.content_type)
+
+        async with self._tm.transaction():
+            file_id = await self._file_service.create_file_from_stream(image_file_data, actor_id=user_id)
+            user.avatar_file_id = file_id
+            await self._user_repository.save(user)
+
+    async def update_user(self, user_id: uuid.UUID, data: UserUpdateDto) -> None:
         user = await self._user_repository.get_by_id(user_id)
         user.update(name=data.name)
         await self._user_repository.save(user)
-        return user.id
 
     async def sign_up_user(self, data: UserSignUpDto) -> uuid.UUID:
         normal_email = UserModel.normalize_email(data.email)
