@@ -9,7 +9,7 @@ from litestar import Litestar
 from litestar.config.cors import CORSConfig
 from litestar.middleware.logging import LoggingMiddlewareConfig
 from litestar.openapi import OpenAPIConfig
-from litestar.openapi.plugins import SwaggerRenderPlugin
+from litestar.openapi.plugins import ScalarRenderPlugin, SwaggerRenderPlugin
 from litestar.openapi.spec import Components, SecurityScheme
 from litestar.plugins.structlog import StructlogConfig, StructlogPlugin
 
@@ -29,7 +29,7 @@ def create_litestar_app(
             title="Some Api",
             version="1.0.0",
             path="/api/docs",
-            render_plugins=[SwaggerRenderPlugin()],
+            render_plugins=[ScalarRenderPlugin(path="/scalar"), SwaggerRenderPlugin(path="/swagger")],
             security=[{"BearerToken": []}],
             components=Components(
                 security_schemes={

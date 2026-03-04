@@ -1,5 +1,8 @@
+import aiohttp
+
 from app.core.application.dto.file import FileUploadData, FileUploadResult, FileUploadStreamData
 from app.core.application.interfaces.services.file import IFileStorage
+from app.core.models import FileModel
 
 
 class MockFileStorage(IFileStorage):
@@ -20,3 +23,9 @@ class MockFileStorage(IFileStorage):
             file_url=self.PUBLIC_FILE_URL,
             file_size=len(data.file_data),
         )
+
+    async def get_uploaded_file(self, file: FileModel) -> bytes:
+        url = file.url
+        async with aiohttp.ClientSession() as session, session.get(url) as response:
+            response.raise_for_status()
+            return await response.read()

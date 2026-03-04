@@ -17,7 +17,7 @@ class FileRepository(IFileRepository):
     _tm: TransactionManager
     _entity_event_bus: IEntityEventBus
 
-    async def save(self, file: FileModel, *, actor_id: uuid.UUID) -> None:
+    async def save(self, file: FileModel, *, actor_id: uuid.UUID | None) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(file)
             tx.add_async_after_commit(partial(self._public_save_event, file, actor_id))
@@ -31,7 +31,7 @@ class FileRepository(IFileRepository):
                 raise EntityNotFoundError("File")
             return entity
 
-    async def _public_save_event(self, file: FileModel, actor_id: uuid.UUID) -> None:
+    async def _public_save_event(self, file: FileModel, actor_id: uuid.UUID | None) -> None:
         await self._entity_event_bus.publish(
             EntityEvent(
                 producer_id=actor_id,

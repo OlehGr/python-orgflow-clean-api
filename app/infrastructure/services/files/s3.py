@@ -10,6 +10,7 @@ from app.core.application.dto.file import FileUploadData, FileUploadResult, File
 from app.core.application.interfaces.services.file import IFileStorage
 from app.core.config import env_config
 from app.core.exceptions.validation import InvalidCaseError
+from app.core.models import FileModel
 
 
 if TYPE_CHECKING:
@@ -23,7 +24,9 @@ class S3FileStorage(IFileStorage):
         self.session = get_session()
 
     async def upload_file_data(self, data: FileUploadData) -> FileUploadResult:
-        object_key = self._generate_object_key(file_id=data.file_id, file_name=data.file_name)
+        object_key = self._generate_object_key(
+            file_id=data.file_id, file_name=data.file_name, file_name_prefix=data.file_name_prefix
+        )
         bucket = env_config.s3_bucket
 
         async with self._get_client() as client:
@@ -42,7 +45,9 @@ class S3FileStorage(IFileStorage):
             return FileUploadResult(file_url=file_url, file_size=file_size)
 
     async def upload_file_stream(self, data: FileUploadStreamData) -> FileUploadResult:
-        object_key = self._generate_object_key(file_id=data.file_id, file_name=data.file_name)
+        object_key = self._generate_object_key(
+            file_id=data.file_id, file_name=data.file_name, file_name_prefix=data.file_name_prefix
+        )
         bucket = env_config.s3_bucket
 
         async with self._get_client() as client:
@@ -105,8 +110,17 @@ class S3FileStorage(IFileStorage):
             file_url = self._generate_file_url(object_key)
             return FileUploadResult(file_url=file_url, file_size=file_size)
 
-    def _generate_object_key(self, *, file_id: uuid.UUID, file_name: str) -> str:
-        return f"{env_config.s3_directory}/{env_config.s3_prefix}/{file_id}/{file_name.lower()}"
+    async def get_uploaded_file(self, file: FileModel) -> bytes:
+        object_key = file.file_url_key
+        bucket = env_config.s3_bucket
+
+        async with self._get_client() as s3:
+            obj = await s3.get_object(Bucket=bucket, Key=object_key)
+            return await obj["Body"].read()
+
+    def _generate_object_key(self, *, file_id: uuid.UUID, file_name: str, file_name_prefix: str | None) -> str:
+        end = f"{file_name_prefix}/{file_name}" if file_name_prefix else file_name
+        return f"{env_config.s3_directory}/{env_config.s3_prefix}/{file_id}/{end}"
 
     def _generate_file_url(self, object_key: str) -> str:
         return f"{env_config.s3_url}/{env_config.s3_bucket}/{object_key}"

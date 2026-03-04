@@ -1,4 +1,5 @@
 import uuid
+from urllib.parse import urlparse
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
@@ -13,6 +14,7 @@ class FileModel(EntityModel):
     name: Mapped[str]
     size: Mapped[int]
     content_type: Mapped[str]
+    hash: Mapped[str | None]
 
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), index=True)
 
@@ -26,6 +28,7 @@ class FileModel(EntityModel):
         size: int,
         content_type: str,
         author_id: uuid.UUID,
+        hash_: str | None = None,
     ) -> "FileModel":
         return cls(
             is_removed=False,
@@ -33,15 +36,33 @@ class FileModel(EntityModel):
             updated_at=get_native_utc_now(),
             id=file_id,
             url=url,
-            name=name,
+            name=cls.normalize_file_name(name),
             size=size,
             content_type=content_type,
             author_id=author_id,
+            hash=hash_,
         )
 
-    async def set_file_source(self, *, url: str, size: int) -> None:
+    def set_file_hash(self, hash_: str) -> None:
+        self.hash = hash_
+
+    def set_image_data(self, *, name: str, content_type: str, url: str, size: int) -> None:
+        self.name = name
+        self.content_type = content_type
         self.url = url
         self.size = size
+
+    @staticmethod
+    def normalize_file_name(name: str) -> str:
+        return name.lower()
+
+    @property
+    def is_image(self) -> bool:
+        return self.content_type.lower().startswith("image/")
+
+    @property
+    def file_url_key(self) -> str:
+        return urlparse(self.url).path.lstrip("/").split("/", 1)[1]
 
 
 class FileEventDto(EntityDto, frozen=True):

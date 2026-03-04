@@ -1,6 +1,6 @@
 import uuid
 from collections.abc import AsyncGenerator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from app.core.models import EntityDto, FileModel
 
@@ -38,6 +38,7 @@ class FileUploadStreamData:
     file_stream: AsyncGenerator[bytes]
     file_name: str
     content_type: str
+    file_name_prefix: str | None = field(default=None)
 
 
 @dataclass(frozen=True)
@@ -46,9 +47,17 @@ class FileUploadData:
     file_data: bytes
     file_name: str
     content_type: str
+    file_name_prefix: str | None = field(default=None)
 
 
 @dataclass(frozen=True)
 class FileUploadResult:
     file_url: str
     file_size: int
+
+
+@dataclass(frozen=True)
+class ImagerCompressResult:
+    optimized_data: bytes
+    content_type: str
+    file_name: str

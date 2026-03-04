@@ -43,7 +43,10 @@ class UserController(Controller):
         await user_service.update_user(user_id, data)
         return await user_projection.get_by_id(user_id)
 
-    @put("/me/avatar", status_code=HTTP_200_OK)
+    @put(
+        "/me/avatar",
+        status_code=HTTP_200_OK,
+    )
     @inject
     async def update_me_avatar(
         self,
