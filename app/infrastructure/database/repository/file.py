@@ -1,6 +1,5 @@
 import uuid
 from dataclasses import dataclass
-from functools import partial
 
 from app.core.application.interfaces.common.events import IEntityEventBus
 from app.core.application.interfaces.repository.file import IFileRepository
@@ -20,7 +19,7 @@ class FileRepository(IFileRepository):
     async def save(self, file: FileModel, *, actor_id: uuid.UUID | None) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(file)
-            tx.add_async_after_commit(partial(self._public_save_event, file, actor_id))
+            tx.add_async_after_commit(lambda: self._public_save_event(file, actor_id))
 
     async def get_by_id(self, file_id: uuid.UUID) -> FileModel:
         query = FileSelectBuilder.build_get_by_id_select(file_id)

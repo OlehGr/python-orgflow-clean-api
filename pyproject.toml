@@ -28,13 +28,47 @@ dependencies = [
     "types-aiobotocore>=3.1.3",
     "types-aiobotocore-s3>=3.1.3",
     "uvicorn>=0.41.0",
-    "uvloop>=0.22.1",
+    "uvloop>=0.22.1; sys_platform == 'linux'",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.2",
-    "ty>=0.0.18",
+    "ruff",
+    "ty",
+]
+api = [
+    "aio-pika>=9.6.1",
+    "aiobotocore>=3.1.3",
+    "aiohttp>=3.13.3",
+    "aiosmtplib>=5.1.0",
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "bcrypt>=5.0.0",
+    "dishka>=1.8.0",
+    "dynaconf>=3.2.12",
+    "granian>=2.7.1",
+    "jinja2>=3.1.6",
+    "litestar[jwt]>=2.21.0",
+    "msgspec>=0.20.0",
+    "python-jose>=3.5.0",
+    "sqlalchemy>=2.0.46",
+    "structlog>=25.5.0",
+    "uvloop>=0.22.1",
+    "faststream[rabbit]>=0.6.6",
+]
+file-compress-worker = [
+    "aio-pika>=9.6.1",
+    "aiobotocore>=3.1.3",
+    "aiohttp>=3.13.3",
+    "asyncpg>=0.31.0",
+    "bcrypt>=5.0.0",
+    "blurhash-python>=1.2.2",
+    "dishka>=1.8.0",
+    "dynaconf>=3.2.12",
+    "faststream[cli]>=0.6.6",
+    "msgspec>=0.20.0",
+    "pillow>=12.1.1",
+    "sqlalchemy>=2.0.46",
 ]
 
 

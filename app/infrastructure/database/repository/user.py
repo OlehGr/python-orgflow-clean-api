@@ -1,6 +1,5 @@
 import uuid
 from dataclasses import dataclass
-from functools import partial
 from typing import Unpack
 
 from app.core.application.dto.user import UsersGetParams
@@ -22,7 +21,7 @@ class UserRepository(IUserRepository):
     async def save(self, user: UserModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(user)
-            tx.add_async_after_commit(partial(self._public_save_event, user))
+            tx.add_async_after_commit(lambda: self._public_save_event(user))
 
     async def get_all(self, **kwargs: Unpack[UsersGetParams]) -> list[UserModel]:
         query = UserSelectBuilder.build_get_all_select(**kwargs)

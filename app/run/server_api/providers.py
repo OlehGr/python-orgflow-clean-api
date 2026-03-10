@@ -16,7 +16,6 @@ from app.infrastructure.database.repository.user import UserRepository
 from app.infrastructure.producer.file import RabbitFileCompressProducer
 from app.infrastructure.services.email.local import LoggerEmailService
 from app.infrastructure.services.email.smtp import SmtpEmailService
-from app.infrastructure.services.files.mock import MockFileStorage
 from app.infrastructure.services.files.s3 import S3FileStorage
 from app.infrastructure.services.tokens.jwt import JwtService
 
@@ -42,4 +41,3 @@ class LocalMockInjectionsProvider(Provider):
     scope = Scope.APP
 
     email_service = provide(LoggerEmailService, provides=IEmailService)
-    file_storage = provide(MockFileStorage, provides=IFileStorage)

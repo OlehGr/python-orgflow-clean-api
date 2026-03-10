@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  some-app-api:
+    build:
+      context: ../../
+      dockerfile: ./deploy/server-api.Dockerfile
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.some-app.rule=Host(`some-app.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.services.some-app.loadbalancer.server.port=8000"
+      - "traefik.http.routers.some-app.priority=20"
+    environment:
+      # Run
+      LOCAL_DEV: 1
+      #App
+      SECRET_KEY: SECRET_KEY
+      BASE_URL: http://some-app.localhost
+
+      # Postgres
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgresql:5432/some_app
+
+      # Rabbit
+      RABBIT_URL: amqp://rabbitmq:rabbitmq@rabbitmq:5672/
+
+      # S3
+      S3_DIRECTORY: some-app
+      S3_PREFIX: stage
+      S3_URL: http://minio:9000
+      S3_PUBLIC_URL: http://minio.localhost
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio123
+      S3_BUCKET: some-bucket
+
+  file-worker:
+    build:
+      context: ../../
+      dockerfile: ./deploy/file-compress-worker.Dockerfile
+    restart: unless-stopped
+    networks:
+      - web
+    environment:
+      # Postgres
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgresql:5432/some_app
+
+      # Rabbit
+      RABBIT_URL: amqp://rabbitmq:rabbitmq@rabbitmq:5672/
+
+      # S3
+      S3_DIRECTORY: some-app
+      S3_PREFIX: stage
+      S3_URL: http://minio:9000
+      S3_ACCESS_KEY: minio
+      S3_SECRET_KEY: minio123
+      S3_BUCKET: some-bucket
+networks:
+  web:
+    external: true

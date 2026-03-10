@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 from aiobotocore.session import AioSession, get_session
-from types_aiobotocore_s3.client import S3Client
 
 from app.core.application.dto.file import FileUploadData, FileUploadResult, FileUploadStreamData
 from app.core.application.interfaces.services.file import IFileStorage
@@ -14,6 +13,7 @@ from app.core.models import FileModel
 
 
 if TYPE_CHECKING:
+    from types_aiobotocore_s3.client import S3Client
     from types_aiobotocore_s3.type_defs import CompletedPartTypeDef
 
 
@@ -123,7 +123,7 @@ class S3FileStorage(IFileStorage):
         return f"{env_config.s3_directory}/{env_config.s3_prefix}/{file_id}/{end}"
 
     def _generate_file_url(self, object_key: str) -> str:
-        return f"{env_config.s3_url}/{env_config.s3_bucket}/{object_key}"
+        return f"{env_config.s3_public_url or env_config.s3_url}/{env_config.s3_bucket}/{object_key}"
 
     def _validate_size(self, size: int) -> None:
         max_bytes = 1024 * 1024 * 1024
@@ -132,7 +132,7 @@ class S3FileStorage(IFileStorage):
             raise InvalidCaseError("Файл слишком большой")
 
     @asynccontextmanager
-    async def _get_client(self) -> AsyncGenerator[S3Client]:
+    async def _get_client(self) -> AsyncGenerator["S3Client"]:
         async with self.session.create_client(
             "s3",
             aws_access_key_id=env_config.s3_access_key,

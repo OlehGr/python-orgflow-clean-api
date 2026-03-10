@@ -15,5 +15,6 @@ env_config = Dynaconf(
         Validator("SERVER_WORKERS", default=1, cast=int),
         Validator("SERVER_WORKER_THREADS", default=1, cast=int),
         Validator("SERVER_PORT", default=8000, cast=int),
+        Validator("S3_PUBLIC_URL", default=None),
     ],
 )

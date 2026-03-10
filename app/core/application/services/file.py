@@ -38,9 +38,9 @@ class FileService:
             author_id=actor_id,
         )
 
-        async with self._tm.transaction():
+        async with self._tm.transaction() as tx:
             await self._file_repository.save(file, actor_id=actor_id)
-            await self._file_compress_producer.send(file.id)
+            tx.add_async_after_commit(lambda: self._file_compress_producer.send(file.id))
 
         return file.id
 
