@@ -17,11 +17,15 @@ EntityEventAllSubjects = Literal["*"]
 class EntityEventSubject(enum.StrEnum):
     user_save = "user_save"
     file_save = "file_save"
+    organization_save = "organization_save"
+    organization_member_save = "organization_member_save"
 
 
 class EntityEventEntity(enum.StrEnum):
     user = "user"
     file = "file"
+    organization = "organization"
+    organization_member = "organization_member"
 
 
 TEntity = TypeVar("TEntity", bound=IdDto, default=IdDto)

@@ -24,7 +24,7 @@ class BaseModel(DeclarativeBase):
 class IdModel(BaseModel):
     __abstract__ = True
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, unique=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, unique=True)
 
 
 class EntityModel(IdModel):

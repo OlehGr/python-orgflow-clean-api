@@ -5,8 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.exceptions.validation import InvalidCaseError
-from app.core.models import EntityDto
-from app.core.models.base import EntityModel
+from app.core.models.base import EntityDto, EntityModel
 
 
 class UserModel(EntityModel):

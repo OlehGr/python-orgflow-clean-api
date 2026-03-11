@@ -4,7 +4,7 @@ from typing import TypeVar
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.application.dto.user import UserAvatarReadDto
+from app.core.application.dto.user import UserAvatarReadDto, UserReadDto
 from app.core.models import BaseModel, FileModel, UserModel
 
 
@@ -32,6 +32,19 @@ class EntitiesLoadHelper:
     ) -> dict[uuid.UUID, UserAvatarReadDto]:
         files = await cls.load_files(file_ids, session)
         return {file.id: UserAvatarReadDto.from_file(file) for file in files}
+
+    @classmethod
+    async def load_user_reads_map(cls, user_ids: set[uuid.UUID], session: AsyncSession) -> dict[uuid.UUID, UserReadDto]:
+        users = await cls.load_users(user_ids, session)
+        user_avatar_reads_map = await cls.load_user_avatar_reads_map(
+            {user.avatar_file_id for user in users if user.avatar_file_id}, session
+        )
+        return {
+            user.id: UserReadDto.from_user(
+                user, avatar=user_avatar_reads_map[user.avatar_file_id] if user.avatar_file_id else None
+            )
+            for user in users
+        }
 
     @classmethod
     async def load_files(cls, file_ids: set[uuid.UUID], session: AsyncSession) -> tuple[FileModel, ...]:

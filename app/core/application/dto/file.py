@@ -2,7 +2,8 @@ import uuid
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 
-from app.core.models import EntityDto, FileModel
+from app.core.models import FileModel
+from app.core.models.base import EntityDto
 
 
 class FileReadDto(EntityDto, frozen=True):

@@ -2,7 +2,8 @@ from typing import NotRequired, Optional, TypedDict
 
 import msgspec
 
-from app.core.models import EntityDto, FileModel, UserModel
+from app.core.models import FileModel, UserModel
+from app.core.models.base import EntityDto
 
 
 class UsersGetParams(TypedDict):

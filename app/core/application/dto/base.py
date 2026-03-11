@@ -70,6 +70,6 @@ class Paged[ItemDto](msgspec.Struct, frozen=True):
         )
 
 
-class LimitationParams(TypedDict):
+class LimitationGetParams(TypedDict):
     page: NotRequired[int]
-    limit: NotRequired[int | None]
+    limit: NotRequired[int]
