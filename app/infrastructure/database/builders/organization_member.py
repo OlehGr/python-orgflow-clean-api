@@ -6,6 +6,7 @@ from sqlalchemy import Select, select
 from app.core.application.dto.organization_member import OrganizationMembersGetParams
 from app.core.models import OrganizationMemberModel
 from app.infrastructure.database.builders.base import BaseSelectBuilder
+from app.infrastructure.database.builders.organization import OrganizationSelectBuilder
 
 
 SelectOrganizationMemberModel = Select[tuple[OrganizationMemberModel]]
@@ -44,12 +45,11 @@ class OrganizationMemberSelectBuilder(BaseSelectBuilder):
 
     @classmethod
     def build_actor_organization_member_ids_select(cls, actor_id: uuid.UUID) -> Select:
-        actor_organization_ids_cte = (
-            select(OrganizationMemberModel.organization_id).where(OrganizationMemberModel.user_id == actor_id).cte()
-        )
+        actor_organization_ids_cte = OrganizationSelectBuilder.build_actor_organization_ids_select(actor_id).cte()
 
-        return select(OrganizationMemberModel.id).join(
-            actor_organization_ids_cte.c.organization_id == OrganizationMemberModel.organization_id
+        return select(OrganizationMemberModel.id.label("organization_member_id")).join(
+            actor_organization_ids_cte,
+            actor_organization_ids_cte.c.organization_id == OrganizationMemberModel.organization_id,
         )
 
     @classmethod

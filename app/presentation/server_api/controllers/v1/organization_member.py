@@ -14,7 +14,7 @@ from app.core.application.dto.organization_member import (
     OrganizationMemberUpdateRoleDto,
 )
 from app.core.application.interfaces.projection.organization_member import IOrganizationMemberProjection
-from app.core.application.services.orgnaization import OrganizationMemberService
+from app.core.application.services.organization import OrganizationMemberService
 
 
 class OrganizationMemberController(Controller):

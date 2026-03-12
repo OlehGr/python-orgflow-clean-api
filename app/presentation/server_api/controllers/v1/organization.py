@@ -11,7 +11,7 @@ from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CON
 from app.core.application.dto.base import Paged, Paginated
 from app.core.application.dto.organization import OrganizationCreateDto, OrganizationReadDto, OrganizationUpdateDto
 from app.core.application.interfaces.projection.organization import IOrganizationProjection
-from app.core.application.services.orgnaization import OrganizationService
+from app.core.application.services.organization import OrganizationService
 
 
 class OrganizationController(Controller):

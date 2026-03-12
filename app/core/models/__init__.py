@@ -3,6 +3,7 @@ from .entity_event import EntityEventModel
 from .file import FileModel
 from .organization import OrganizationModel
 from .organization_member import OrganizationMemberModel
+from .project import ProjectModel
 from .user import UserModel
 
 
@@ -12,5 +13,6 @@ __all__ = (
     "FileModel",
     "OrganizationMemberModel",
     "OrganizationModel",
+    "ProjectModel",
     "UserModel",
 )

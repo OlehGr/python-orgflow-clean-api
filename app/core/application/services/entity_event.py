@@ -18,6 +18,7 @@ class EntityEventService:
 
     async def save_entity_event(self, entity_event: EntityEvent) -> None:
         event = EntityEventModel.create(
+            event_id=entity_event.id,
             entity=entity_event.entity,
             entity_id=entity_event.entity_id,
             subject=entity_event.subject,

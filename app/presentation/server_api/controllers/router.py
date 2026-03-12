@@ -6,12 +6,19 @@ from app.presentation.shared.litestar.errors import internal_error_handler, mess
 from .v1.auth import AuthController
 from .v1.organization import OrganizationController
 from .v1.organization_member import OrganizationMemberController
+from .v1.project import ProjectController
 from .v1.user import UserController
 
 
 app_api_router = Router(
     path="/api/v1",
-    route_handlers=[AuthController, UserController, OrganizationController, OrganizationMemberController],
+    route_handlers=[
+        AuthController,
+        UserController,
+        OrganizationController,
+        OrganizationMemberController,
+        ProjectController,
+    ],
     exception_handlers={
         BasicMessageError: message_error_handler,
         HTTP_500_INTERNAL_SERVER_ERROR: internal_error_handler,

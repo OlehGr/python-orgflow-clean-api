@@ -22,6 +22,7 @@ class OrganizationMemberReadDto(EntityDto, frozen=True):
     organization_id: uuid.UUID
     user_id: uuid.UUID
     user: UserReadDto
+    role: OrganizationMemberRole
 
     @classmethod
     def from_organization_member(
@@ -33,6 +34,7 @@ class OrganizationMemberReadDto(EntityDto, frozen=True):
             updated_at=organization_member.updated_at,
             is_removed=organization_member.is_removed,
             organization_id=organization_member.organization_id,
+            role=organization_member.role,
             user_id=organization_member.user_id,
             user=user,
         )

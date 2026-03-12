@@ -40,17 +40,29 @@ class OrganizationMemberRepository(IOrganizationMemberRepository):
     async def save(self, organization_member: OrganizationMemberModel, *, actor_id: uuid.UUID | None) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(organization_member)
-            tx.add_async_after_commit(lambda: self._public_save_event(organization_member, actor_id))
-
-    async def _public_save_event(
-        self, organization_member: OrganizationMemberModel, actor_id: uuid.UUID | None
-    ) -> None:
-        await self._entity_event_bus.publish(
-            EntityEvent(
-                producer_id=actor_id,
-                subject=EntityEventSubject.organization_member_save,
-                entity=EntityEventEntity.organization_member,
-                entity_id=organization_member.id,
-                data=OrganizationMemberEventDto.from_organization_member(organization_member),
+            tx.add_async_after_commit(
+                lambda: self._entity_event_bus.publish(
+                    EntityEvent(
+                        producer_id=actor_id,
+                        subject=EntityEventSubject.organization_member_save,
+                        entity=EntityEventEntity.organization_member,
+                        entity_id=organization_member.id,
+                        data=OrganizationMemberEventDto.from_organization_member(organization_member),
+                    )
+                )
             )
-        )
+
+    async def delete(self, organization_member: OrganizationMemberModel, *, actor_id: uuid.UUID | None) -> None:
+        async with self._tm.transaction() as tx:
+            await tx.delete(organization_member)
+            tx.add_async_after_commit(
+                lambda: self._entity_event_bus.publish(
+                    EntityEvent(
+                        producer_id=actor_id,
+                        subject=EntityEventSubject.organization_member_delete,
+                        entity=EntityEventEntity.organization_member,
+                        entity_id=organization_member.id,
+                        data=OrganizationMemberEventDto.from_organization_member(organization_member),
+                    )
+                )
+            )

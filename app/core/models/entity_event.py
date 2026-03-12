@@ -16,9 +16,19 @@ EntityEventAllSubjects = Literal["*"]
 
 class EntityEventSubject(enum.StrEnum):
     user_save = "user_save"
+    user_delete = "user_delete"
+
     file_save = "file_save"
+    file_delete = "file_delete"
+
     organization_save = "organization_save"
+    organization_delete = "organization_delete"
+
     organization_member_save = "organization_member_save"
+    organization_member_delete = "organization_member_delete"
+
+    project_save = "project_save"
+    project_delete = "project_delete"
 
 
 class EntityEventEntity(enum.StrEnum):
@@ -26,6 +36,7 @@ class EntityEventEntity(enum.StrEnum):
     file = "file"
     organization = "organization"
     organization_member = "organization_member"
+    project = "project"
 
 
 TEntity = TypeVar("TEntity", bound=IdDto, default=IdDto)
@@ -57,6 +68,7 @@ class EntityEventModel(IdModel):
     def create(
         cls,
         *,
+        event_id: uuid.UUID,
         subject: EntityEventSubject,
         entity_id: uuid.UUID,
         entity: EntityEventEntity,
@@ -64,6 +76,7 @@ class EntityEventModel(IdModel):
         data: dict[str, Any] | None,
     ) -> "EntityEventModel":
         return cls(
+            id=event_id,
             created_at=get_native_utc_now(),
             producer_id=producer_id,
             entity=entity,

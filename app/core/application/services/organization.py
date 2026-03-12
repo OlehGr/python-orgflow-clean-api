@@ -7,6 +7,7 @@ from app.core.application.interfaces.managers.transaction import ITransactionMan
 from app.core.application.interfaces.repository.organization import IOrganizationRepository
 from app.core.application.services.organization_member import OrganizationMemberService
 from app.core.models import OrganizationModel
+from app.core.models.organization_member import OrganizationMemberRole
 
 
 @dataclass
@@ -24,8 +25,7 @@ class OrganizationService:
 
             await self._organization_member_service.create_organization_member(
                 OrganizationMemberCreateDto(
-                    organization_id=organization.id,
-                    user_id=actor_id,
+                    organization_id=organization.id, user_id=actor_id, role=OrganizationMemberRole.ADMIN
                 ),
                 actor_id=actor_id,
             )

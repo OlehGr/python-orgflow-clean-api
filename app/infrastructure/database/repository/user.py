@@ -21,7 +21,17 @@ class UserRepository(IUserRepository):
     async def save(self, user: UserModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(user)
-            tx.add_async_after_commit(lambda: self._public_save_event(user))
+            tx.add_async_after_commit(
+                lambda: self._entity_event_bus.publish(
+                    EntityEvent(
+                        producer_id=None,
+                        subject=EntityEventSubject.user_save,
+                        entity=EntityEventEntity.user,
+                        entity_id=user.id,
+                        data=UserEventDto.from_user(user),
+                    )
+                )
+            )
 
     async def get_all(self, **kwargs: Unpack[UsersGetParams]) -> list[UserModel]:
         query = UserSelectBuilder.build_get_all_select(**kwargs)
@@ -37,14 +47,3 @@ class UserRepository(IUserRepository):
             if not entity:
                 raise EntityNotFoundError("User")
             return entity
-
-    async def _public_save_event(self, user: UserModel) -> None:
-        await self._entity_event_bus.publish(
-            EntityEvent(
-                producer_id=None,
-                subject=EntityEventSubject.user_save,
-                entity=EntityEventEntity.user,
-                entity_id=user.id,
-                data=UserEventDto.from_user(user),
-            )
-        )

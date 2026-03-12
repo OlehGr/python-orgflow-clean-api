@@ -38,15 +38,29 @@ class OrganizationRepository(IOrganizationRepository):
     async def save(self, organization: OrganizationModel, *, actor_id: uuid.UUID | None) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(organization)
-            tx.add_async_after_commit(lambda: self._public_save_event(organization, actor_id))
-
-    async def _public_save_event(self, organization: OrganizationModel, actor_id: uuid.UUID | None) -> None:
-        await self._entity_event_bus.publish(
-            EntityEvent(
-                producer_id=actor_id,
-                subject=EntityEventSubject.organization_save,
-                entity=EntityEventEntity.organization,
-                entity_id=organization.id,
-                data=OrganizationEventDto.from_organization(organization),
+            tx.add_async_after_commit(
+                lambda: self._entity_event_bus.publish(
+                    EntityEvent(
+                        producer_id=actor_id,
+                        subject=EntityEventSubject.organization_save,
+                        entity=EntityEventEntity.organization,
+                        entity_id=organization.id,
+                        data=OrganizationEventDto.from_organization(organization),
+                    )
+                )
             )
-        )
+
+    async def delete(self, organization: OrganizationModel, *, actor_id: uuid.UUID | None) -> None:
+        async with self._tm.transaction() as tx:
+            await tx.delete(organization)
+            tx.add_async_after_commit(
+                lambda: self._entity_event_bus.publish(
+                    EntityEvent(
+                        producer_id=actor_id,
+                        subject=EntityEventSubject.organization_delete,
+                        entity=EntityEventEntity.organization,
+                        entity_id=organization.id,
+                        data=OrganizationEventDto.from_organization(organization),
+                    )
+                )
+            )

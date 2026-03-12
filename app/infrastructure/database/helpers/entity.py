@@ -4,8 +4,9 @@ from typing import TypeVar
 from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.application.dto.organization import OrganizationReadDto
 from app.core.application.dto.user import UserAvatarReadDto, UserReadDto
-from app.core.models import BaseModel, FileModel, UserModel
+from app.core.models import BaseModel, FileModel, OrganizationModel, UserModel
 
 
 TModel = TypeVar("TModel", bound=BaseModel)
@@ -20,11 +21,6 @@ class EntitiesLoadHelper:
     @classmethod
     async def load_users(cls, user_ids: set[uuid.UUID], session: AsyncSession) -> tuple[UserModel, ...]:
         return await cls.load_models(select(UserModel).where(UserModel.id.in_(user_ids)), session)
-
-    @classmethod
-    async def load_users_map(cls, user_ids: set[uuid.UUID], session: AsyncSession) -> dict[uuid.UUID, UserModel]:
-        users = await cls.load_users(user_ids, session)
-        return {user.id: user for user in users}
 
     @classmethod
     async def load_user_avatar_reads_map(
@@ -54,3 +50,18 @@ class EntitiesLoadHelper:
     async def load_files_map(cls, file_ids: set[uuid.UUID], session: AsyncSession) -> dict[uuid.UUID, FileModel]:
         files = await cls.load_files(file_ids, session)
         return {file.id: file for file in files}
+
+    @classmethod
+    async def load_organizations(
+        cls, organization_ids: set[uuid.UUID], session: AsyncSession
+    ) -> tuple[OrganizationModel, ...]:
+        return await cls.load_models(
+            select(OrganizationModel).where(OrganizationModel.id.in_(organization_ids)), session
+        )
+
+    @classmethod
+    async def load_organization_reads_map(
+        cls, organization_ids: set[uuid.UUID], session: AsyncSession
+    ) -> dict[uuid.UUID, OrganizationReadDto]:
+        organizations = await cls.load_organizations(organization_ids, session)
+        return {organization.id: OrganizationReadDto.from_organization(organization) for organization in organizations}
