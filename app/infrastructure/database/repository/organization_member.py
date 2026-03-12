@@ -2,6 +2,8 @@ import uuid
 from dataclasses import dataclass
 from typing import Unpack
 
+from sqlalchemy import select
+
 from app.core.application.dto.organization_member import OrganizationMembersGetParams
 from app.core.application.interfaces.common.events import IEntityEventBus
 from app.core.application.interfaces.repository.organization_member import IOrganizationMemberRepository
@@ -24,6 +26,19 @@ class OrganizationMemberRepository(IOrganizationMemberRepository):
 
         async with self._tm.session() as session:
             return await DataLoadHelper.load_models_list(query, session)
+
+    async def get_user_organization_member(
+        self, *, user_id: uuid.UUID, organization_id: uuid.UUID
+    ) -> OrganizationMemberModel:
+        query = select(OrganizationMemberModel).where(
+            OrganizationMemberModel.user_id == user_id, OrganizationMemberModel.organization_id == organization_id
+        )
+
+        async with self._tm.session() as session:
+            entity = await session.scalar(query)
+            if not entity:
+                raise EntityNotFoundError("OrganizationMember")
+            return entity
 
     async def get_by_id(
         self, organization_member_id: uuid.UUID, *, actor_id: uuid.UUID | None = None

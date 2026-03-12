@@ -22,3 +22,8 @@ class IOrganizationMemberRepository(Protocol):
     async def get_by_id(
         self, organization_member_id: uuid.UUID, *, actor_id: uuid.UUID | None = None
     ) -> OrganizationMemberModel: ...
+
+    @abstractmethod
+    async def get_user_organization_member(
+        self, *, user_id: uuid.UUID, organization_id: uuid.UUID
+    ) -> OrganizationMemberModel: ...

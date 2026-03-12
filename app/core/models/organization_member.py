@@ -4,14 +4,25 @@ import uuid
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.exceptions.permission import PermissionDeniedError
 from app.core.models.base import EntityDto, EntityModel
 from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
+from app.core.models.permission import Permission
 
 
 class OrganizationMemberRole(enum.StrEnum):
     MEMBER = "MEMBER"
     MANAGER = "MANAGER"
     ADMIN = "ADMIN"
+
+
+ROLE_PERMISSIONS: dict[OrganizationMemberRole, set[Permission]] = {
+    OrganizationMemberRole.ADMIN: {
+        Permission.ALL,
+    },
+    OrganizationMemberRole.MANAGER: {Permission.PROJECT_CREATE, Permission.PROJECT_UPDATE, Permission.PROJECT_DELETE},
+    OrganizationMemberRole.MEMBER: set(),
+}
 
 
 class OrganizationMemberModel(EntityModel):
@@ -36,6 +47,15 @@ class OrganizationMemberModel(EntityModel):
     def set_role(self, role: OrganizationMemberRole) -> None:
         self.role = role
 
+    def ensure_permission(self, permission: Permission) -> None:
+        current_permissions = ROLE_PERMISSIONS[self.role]
+
+        if Permission.ALL in current_permissions:
+            return
+
+        if permission not in current_permissions:
+            raise PermissionDeniedError(f"Доступ к {permission} запрещен")
+
     def to_entity_subject_event(
         self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
     ) -> EntityEvent["OrganizationMemberEventDto"]:
@@ -47,9 +67,7 @@ class OrganizationMemberModel(EntityModel):
             data=OrganizationMemberEventDto.from_organization_member(self),
         )
 
-    def to_entity_save_event(
-        self, *, producer_id: uuid.UUID | None
-    ) -> EntityEvent["OrganizationMemberEventDto"]:
+    def to_entity_save_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["OrganizationMemberEventDto"]:
         return self.to_entity_subject_event(
             self._resolve_entity_save_subject(
                 EntityEventSubject.organization_member_create,
@@ -58,9 +76,7 @@ class OrganizationMemberModel(EntityModel):
             producer_id=producer_id,
         )
 
-    def to_entity_delete_event(
-        self, *, producer_id: uuid.UUID | None
-    ) -> EntityEvent["OrganizationMemberEventDto"]:
+    def to_entity_delete_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["OrganizationMemberEventDto"]:
         return self.to_entity_subject_event(EntityEventSubject.organization_member_delete, producer_id=producer_id)
 
 
