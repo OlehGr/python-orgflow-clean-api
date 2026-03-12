@@ -6,8 +6,7 @@ from app.core.application.dto.project import ProjectsGetParams
 from app.core.application.interfaces.common.events import IEntityEventBus
 from app.core.application.interfaces.repository.project import IProjectRepository
 from app.core.exceptions.entity import EntityNotFoundError
-from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
-from app.core.models.project import ProjectEventDto, ProjectModel
+from app.core.models.project import ProjectModel
 from app.infrastructure.database.builders.project import ProjectSelectBuilder
 from app.infrastructure.database.helpers.data import DataLoadHelper
 from app.infrastructure.database.internal.transaction import TransactionManager
@@ -39,28 +38,12 @@ class ProjectRepository(IProjectRepository):
         async with self._tm.transaction() as tx:
             await tx.merge(project)
             tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(
-                    EntityEvent(
-                        producer_id=actor_id,
-                        subject=EntityEventSubject.project_save,
-                        entity=EntityEventEntity.project,
-                        entity_id=project.id,
-                        data=ProjectEventDto.from_project(project),
-                    )
-                )
+                lambda: self._entity_event_bus.publish(project.to_entity_save_event(producer_id=actor_id))
             )
 
     async def delete(self, project: ProjectModel, *, actor_id: uuid.UUID | None) -> None:
         async with self._tm.transaction() as tx:
             await tx.delete(project)
             tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(
-                    EntityEvent(
-                        producer_id=actor_id,
-                        subject=EntityEventSubject.project_delete,
-                        entity=EntityEventEntity.project,
-                        entity_id=project.id,
-                        data=ProjectEventDto.from_project(project),
-                    )
-                )
+                lambda: self._entity_event_bus.publish(project.to_entity_delete_event(producer_id=actor_id))
             )

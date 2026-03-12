@@ -5,6 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.models.base import EntityDto, EntityModel, get_native_utc_now
+from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
 class FileModel(EntityModel):
@@ -63,6 +64,26 @@ class FileModel(EntityModel):
     @property
     def file_url_key(self) -> str:
         return urlparse(self.url).path.lstrip("/").split("/", 1)[1]
+
+    def to_entity_subject_event(
+        self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
+    ) -> EntityEvent["FileEventDto"]:
+        return EntityEvent(
+            producer_id=producer_id,
+            subject=subject,
+            entity=EntityEventEntity.file,
+            entity_id=self.id,
+            data=FileEventDto.from_file(self),
+        )
+
+    def to_entity_save_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["FileEventDto"]:
+        return self.to_entity_subject_event(
+            self._resolve_entity_save_subject(EntityEventSubject.file_create, EntityEventSubject.file_update),
+            producer_id=producer_id,
+        )
+
+    def to_entity_delete_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["FileEventDto"]:
+        return self.to_entity_subject_event(EntityEventSubject.file_delete, producer_id=producer_id)
 
 
 class FileEventDto(EntityDto, frozen=True):

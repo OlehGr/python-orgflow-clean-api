@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.models.base import EntityDto, EntityModel
+from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
 class ProjectModel(EntityModel):
@@ -19,6 +20,26 @@ class ProjectModel(EntityModel):
 
     def update(self, *, name: str) -> None:
         self.name = name
+
+    def to_entity_subject_event(
+        self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
+    ) -> EntityEvent["ProjectEventDto"]:
+        return EntityEvent(
+            producer_id=producer_id,
+            subject=subject,
+            entity=EntityEventEntity.project,
+            entity_id=self.id,
+            data=ProjectEventDto.from_project(self),
+        )
+
+    def to_entity_save_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["ProjectEventDto"]:
+        return self.to_entity_subject_event(
+            self._resolve_entity_save_subject(EntityEventSubject.project_create, EntityEventSubject.project_update),
+            producer_id=producer_id,
+        )
+
+    def to_entity_delete_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["ProjectEventDto"]:
+        return self.to_entity_subject_event(EntityEventSubject.project_delete, producer_id=producer_id)
 
 
 class ProjectEventDto(EntityDto, frozen=True):

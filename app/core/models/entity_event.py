@@ -19,16 +19,20 @@ class EntityEventSubject(enum.StrEnum):
     user_update = "user_update"
     user_delete = "user_delete"
 
-    file_save = "file_save"
+    file_create = "file_create"
+    file_update = "file_update"
     file_delete = "file_delete"
 
-    organization_save = "organization_save"
+    organization_create = "organization_create"
+    organization_update = "organization_update"
     organization_delete = "organization_delete"
 
-    organization_member_save = "organization_member_save"
+    organization_member_create = "organization_member_create"
+    organization_member_update = "organization_member_update"
     organization_member_delete = "organization_member_delete"
 
-    project_save = "project_save"
+    project_create = "project_create"
+    project_update = "project_update"
     project_delete = "project_delete"
 
 

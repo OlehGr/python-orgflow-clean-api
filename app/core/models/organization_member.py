@@ -5,6 +5,7 @@ from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.models.base import EntityDto, EntityModel
+from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
 class OrganizationMemberRole(enum.StrEnum):
@@ -34,6 +35,33 @@ class OrganizationMemberModel(EntityModel):
 
     def set_role(self, role: OrganizationMemberRole) -> None:
         self.role = role
+
+    def to_entity_subject_event(
+        self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
+    ) -> EntityEvent["OrganizationMemberEventDto"]:
+        return EntityEvent(
+            producer_id=producer_id,
+            subject=subject,
+            entity=EntityEventEntity.organization_member,
+            entity_id=self.id,
+            data=OrganizationMemberEventDto.from_organization_member(self),
+        )
+
+    def to_entity_save_event(
+        self, *, producer_id: uuid.UUID | None
+    ) -> EntityEvent["OrganizationMemberEventDto"]:
+        return self.to_entity_subject_event(
+            self._resolve_entity_save_subject(
+                EntityEventSubject.organization_member_create,
+                EntityEventSubject.organization_member_update,
+            ),
+            producer_id=producer_id,
+        )
+
+    def to_entity_delete_event(
+        self, *, producer_id: uuid.UUID | None
+    ) -> EntityEvent["OrganizationMemberEventDto"]:
+        return self.to_entity_subject_event(EntityEventSubject.organization_member_delete, producer_id=producer_id)
 
 
 class OrganizationMemberEventDto(EntityDto, frozen=True):
