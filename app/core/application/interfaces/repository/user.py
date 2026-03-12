@@ -11,6 +11,9 @@ class IUserRepository(Protocol):
     async def save(self, user: UserModel) -> None: ...
 
     @abstractmethod
+    async def delete(self, user: UserModel) -> None: ...
+
+    @abstractmethod
     async def get_all(self, **kwargs: Unpack[UsersGetParams]) -> list[UserModel]: ...
 
     @abstractmethod

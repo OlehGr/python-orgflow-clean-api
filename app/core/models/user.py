@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.exceptions.validation import InvalidCaseError
 from app.core.models.base import EntityDto, EntityModel
+from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
 class UserModel(EntityModel):
@@ -31,6 +32,7 @@ class UserModel(EntityModel):
             password_hash=password_hash,
             is_confirmed=False,
             is_active=True,
+            avatar_file_id=None,
         )
 
     def update(self, *, name: str) -> None:
@@ -69,6 +71,23 @@ class UserModel(EntityModel):
     def validate_avatar_content_type(content_type: str) -> None:
         if not content_type.lower().startswith("image/"):
             raise InvalidCaseError("Аватар пользователя должна быть картинка")
+
+    def to_entity_subject_event(self, subject: EntityEventSubject) -> EntityEvent["UserEventDto"]:
+        return EntityEvent(
+            producer_id=None,
+            subject=subject,
+            entity=EntityEventEntity.user,
+            entity_id=self.id,
+            data=UserEventDto.from_user(self),
+        )
+
+    def to_entity_save_event(self) -> EntityEvent["UserEventDto"]:
+        return self.to_entity_subject_event(
+            self._resolve_entity_save_subject(EntityEventSubject.user_create, EntityEventSubject.user_update)
+        )
+
+    def to_entity_delete_event(self) -> EntityEvent["UserEventDto"]:
+        return self.to_entity_subject_event(EntityEventSubject.user_delete)
 
 
 class UserEventDto(EntityDto, frozen=True):

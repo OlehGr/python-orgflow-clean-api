@@ -15,7 +15,8 @@ EntityEventAllSubjects = Literal["*"]
 
 
 class EntityEventSubject(enum.StrEnum):
-    user_save = "user_save"
+    user_create = "user_create"
+    user_update = "user_update"
     user_delete = "user_delete"
 
     file_save = "file_save"
@@ -73,7 +74,7 @@ class EntityEventModel(IdModel):
         entity_id: uuid.UUID,
         entity: EntityEventEntity,
         producer_id: uuid.UUID | None,
-        data: dict[str, Any] | None,
+        data: dict[str, Any],
     ) -> "EntityEventModel":
         return cls(
             id=event_id,
