@@ -11,7 +11,10 @@ from app.core.models.permission import Permission
 class PermissionService:
     _organization_member_repository: IOrganizationMemberRepository
 
-    async def ensure(self, permission: Permission, *, actor_id: uuid.UUID, organization_id: uuid.UUID) -> None:
+    async def ensure(self, permission: Permission, *, actor_id: uuid.UUID | None, organization_id: uuid.UUID) -> None:
+        if not actor_id:
+            return
+
         try:
             organization_member = await self._organization_member_repository.get_user_organization_member(
                 user_id=actor_id, organization_id=organization_id

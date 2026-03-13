@@ -4,7 +4,7 @@ import bcrypt
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.exceptions.validation import InvalidCaseError
+from app.core.exceptions.validation import ConflictError
 from app.core.models.base import EntityDto, EntityModel
 from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
@@ -48,7 +48,7 @@ class UserModel(EntityModel):
         password_valid = bcrypt.checkpw(password.encode("utf-8"), self.password_hash.encode("utf-8"))
 
         if not password_valid:
-            raise InvalidCaseError("Неверный логин или пароль")
+            raise ConflictError("Неверный логин или пароль")
 
     def reset_password(self, new_password: str) -> None:
         password_hash = self.hash_password(new_password)
@@ -70,7 +70,7 @@ class UserModel(EntityModel):
     @staticmethod
     def validate_avatar_content_type(content_type: str) -> None:
         if not content_type.lower().startswith("image/"):
-            raise InvalidCaseError("Аватар пользователя должна быть картинка")
+            raise ConflictError("Аватар пользователя должна быть картинка")
 
     def to_entity_subject_event(self, subject: EntityEventSubject) -> EntityEvent["UserEventDto"]:
         return EntityEvent(

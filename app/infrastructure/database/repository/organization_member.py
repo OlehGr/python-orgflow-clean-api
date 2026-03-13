@@ -30,8 +30,12 @@ class OrganizationMemberRepository(IOrganizationMemberRepository):
     async def get_user_organization_member(
         self, *, user_id: uuid.UUID, organization_id: uuid.UUID
     ) -> OrganizationMemberModel:
-        query = select(OrganizationMemberModel).where(
-            OrganizationMemberModel.user_id == user_id, OrganizationMemberModel.organization_id == organization_id
+        query = (
+            select(OrganizationMemberModel)
+            .where(
+                OrganizationMemberModel.user_id == user_id, OrganizationMemberModel.organization_id == organization_id
+            )
+            .limit(1)
         )
 
         async with self._tm.session() as session:

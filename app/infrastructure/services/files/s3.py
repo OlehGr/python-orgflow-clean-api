@@ -8,7 +8,7 @@ from aiobotocore.session import AioSession, get_session
 from app.core.application.dto.file import FileUploadData, FileUploadResult, FileUploadStreamData
 from app.core.application.interfaces.services.file import IFileStorage
 from app.core.config import env_config
-from app.core.exceptions.validation import InvalidCaseError
+from app.core.exceptions.validation import ConflictError
 from app.core.models import FileModel
 
 
@@ -102,7 +102,7 @@ class S3FileStorage(IFileStorage):
 
             except Exception as e:
                 await client.abort_multipart_upload(Bucket=bucket, Key=object_key, UploadId=upload_id)
-                raise InvalidCaseError("Ошибка загрузки файла") from e
+                raise ConflictError("Ошибка загрузки файла") from e
 
             head = await client.head_object(Bucket=bucket, Key=object_key)
             file_size = head["ContentLength"]
@@ -129,7 +129,7 @@ class S3FileStorage(IFileStorage):
         max_bytes = 1024 * 1024 * 1024
 
         if size > max_bytes:
-            raise InvalidCaseError("Файл слишком большой")
+            raise ConflictError("Файл слишком большой")
 
     @asynccontextmanager
     async def _get_client(self) -> AsyncGenerator["S3Client"]:

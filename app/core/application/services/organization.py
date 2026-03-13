@@ -6,8 +6,10 @@ from app.core.application.dto.organization_member import OrganizationMemberCreat
 from app.core.application.interfaces.managers.transaction import ITransactionManager
 from app.core.application.interfaces.repository.organization import IOrganizationRepository
 from app.core.application.services.organization_member import OrganizationMemberService
+from app.core.application.services.permission import PermissionService
 from app.core.models import OrganizationModel
 from app.core.models.organization_member import OrganizationMemberRole
+from app.core.models.permission import Permission
 
 
 @dataclass
@@ -16,6 +18,7 @@ class OrganizationService:
     _organization_repository: IOrganizationRepository
 
     _organization_member_service: OrganizationMemberService
+    _permission_service: PermissionService
 
     async def create_organization(self, data: OrganizationCreateDto, *, actor_id: uuid.UUID) -> uuid.UUID:
         organization = OrganizationModel.create(name=data.name, author_id=actor_id)
@@ -35,6 +38,10 @@ class OrganizationService:
     async def update_organization(
         self, organization_id: uuid.UUID, data: OrganizationUpdateDto, *, actor_id: uuid.UUID
     ) -> None:
+        await self._permission_service.ensure(
+            Permission.ORGANIZATION_UPDATE, actor_id=actor_id, organization_id=organization_id
+        )
+
         organization = await self._organization_repository.get_by_id(organization_id, actor_id=actor_id)
 
         organization.update(name=data.name)
@@ -42,5 +49,10 @@ class OrganizationService:
         await self._organization_repository.save(organization, actor_id=actor_id)
 
     async def delete_organization(self, organization_id: uuid.UUID, *, actor_id: uuid.UUID) -> None:
+        await self._permission_service.ensure(
+            Permission.ORGANIZATION_DELETE, actor_id=actor_id, organization_id=organization_id
+        )
+
         organization = await self._organization_repository.get_by_id(organization_id, actor_id=actor_id)
+
         await self._organization_repository.delete(organization, actor_id=actor_id)

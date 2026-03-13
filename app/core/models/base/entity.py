@@ -28,7 +28,7 @@ class EntityModel(IdModel):
     created_at: Mapped[datetime] = mapped_column(index=True)
     updated_at: Mapped[datetime] = mapped_column(index=True, onupdate=get_native_utc_now)
 
-    __is_created = field(default=False, init=False)
+    __is_created: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
         self.__is_created = True

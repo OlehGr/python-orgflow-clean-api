@@ -19,7 +19,7 @@ from app.core.application.interfaces.services.tokens import ITokensService
 from app.core.application.services.file import FileService
 from app.core.exceptions.auth import UnauthorizedError
 from app.core.exceptions.entity import EntityNotFoundError
-from app.core.exceptions.validation import InvalidCaseError
+from app.core.exceptions.validation import ConflictError
 from app.core.models import UserModel
 
 
@@ -55,7 +55,7 @@ class UserService:
         email_users = await self._user_repository.get_all(user__normal_email=normal_email)
 
         if email_users:
-            raise InvalidCaseError("Пользователь с таким Email уже существует")
+            raise ConflictError("Пользователь с таким Email уже существует")
 
         user = UserModel.create(name=data.name, email=normal_email, password=data.password)
 
@@ -71,12 +71,12 @@ class UserService:
         email_users = await self._user_repository.get_all(user__normal_email=normal_email)
 
         if not email_users:
-            raise InvalidCaseError("Неверный логин или пароль")
+            raise ConflictError("Неверный логин или пароль")
 
         user = email_users[0]
 
         if not user.can_sign_in:
-            raise InvalidCaseError("Необходимо подтвердить Email")
+            raise ConflictError("Необходимо подтвердить Email")
 
         user.verify_password(data.password)
 
@@ -101,10 +101,10 @@ class UserService:
         email = UserModel.normalize_email(data.email)
 
         if not user.is_confirmed:
-            raise InvalidCaseError("Чтобы изменять email необходимо подтвердить аккаунт")
+            raise ConflictError("Чтобы изменять email необходимо подтвердить аккаунт")
 
         if user.email == email:
-            raise InvalidCaseError("Email не отличается от текущего")
+            raise ConflictError("Email не отличается от текущего")
 
         expire_token = self._tokens_service.generate_expire_token(
             user_id=user.id, expiration=timedelta(minutes=15), data={"email": email}

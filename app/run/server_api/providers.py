@@ -17,6 +17,7 @@ from app.core.application.services.auth import AuthService
 from app.core.application.services.file import FileService
 from app.core.application.services.organization import OrganizationService
 from app.core.application.services.organization_member import OrganizationMemberService
+from app.core.application.services.permission import PermissionService
 from app.core.application.services.project import ProjectService
 from app.core.application.services.user import UserService
 from app.infrastructure.database.projection.organization import OrganizationProjection
@@ -40,6 +41,8 @@ class AppInjectionsProvider(Provider):
 
     tokens_service = provide(JwtService, provides=ITokensService)
     email_service = provide(SmtpEmailService, provides=IEmailService)
+
+    permission_service = provide(PermissionService)
 
     user_repository = provide(UserRepository, provides=IUserRepository)
     user_projection = provide(UserProjection, provides=IUserProjection)

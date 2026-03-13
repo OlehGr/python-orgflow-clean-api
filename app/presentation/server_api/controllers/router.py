@@ -1,8 +1,13 @@
 from litestar import Router
 from litestar.status_codes import HTTP_500_INTERNAL_SERVER_ERROR
+from sqlalchemy.exc import IntegrityError
 
 from app.core.exceptions.base import BasicMessageError
-from app.presentation.shared.litestar.errors import internal_error_handler, message_error_handler
+from app.presentation.shared.litestar.errors import (
+    integrity_error_handler,
+    internal_error_handler,
+    message_error_handler,
+)
 from .v1.auth import AuthController
 from .v1.organization import OrganizationController
 from .v1.organization_member import OrganizationMemberController
@@ -21,6 +26,7 @@ app_api_router = Router(
     ],
     exception_handlers={
         BasicMessageError: message_error_handler,
+        IntegrityError: integrity_error_handler,
         HTTP_500_INTERNAL_SERVER_ERROR: internal_error_handler,
     },
 )
