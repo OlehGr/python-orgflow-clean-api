@@ -1,7 +1,10 @@
 from dishka import Provider, Scope, provide
 
 from app.core.application.interfaces.producer.file import IFileCompressProducer
-from app.core.application.interfaces.projection.organization import IOrganizationProjection
+from app.core.application.interfaces.projection.organization import (
+    IOrganizationProjection,
+    IOrganizationSettingsProjection,
+)
 from app.core.application.interfaces.projection.organization_member import IOrganizationMemberProjection
 from app.core.application.interfaces.projection.project import IProjectProjection
 from app.core.application.interfaces.projection.user import IUserProjection
@@ -20,7 +23,7 @@ from app.core.application.services.organization_member import OrganizationMember
 from app.core.application.services.permission import PermissionService
 from app.core.application.services.project import ProjectService
 from app.core.application.services.user import UserService
-from app.infrastructure.database.projection.organization import OrganizationProjection
+from app.infrastructure.database.projection.organization import OrganizationProjection, OrganizationSettingsProjection
 from app.infrastructure.database.projection.organization_member import OrganizationMemberProjection
 from app.infrastructure.database.projection.project import ProjectProjection
 from app.infrastructure.database.projection.user import UserProjection
@@ -56,6 +59,7 @@ class AppInjectionsProvider(Provider):
 
     organization_repository = provide(OrganizationRepository, provides=IOrganizationRepository)
     organization_projection = provide(OrganizationProjection, provides=IOrganizationProjection)
+    organization_settings_projection = provide(OrganizationSettingsProjection, provides=IOrganizationSettingsProjection)
     organization_service = provide(OrganizationService)
 
     organization_member_repository = provide(OrganizationMemberRepository, provides=IOrganizationMemberRepository)

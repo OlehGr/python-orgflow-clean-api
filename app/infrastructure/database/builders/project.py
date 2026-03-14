@@ -18,7 +18,9 @@ class ProjectSelectBuilder(BaseSelectBuilder):
         cls, *, actor_id: uuid.UUID | None, **kwargs: Unpack[ProjectsGetParams]
     ) -> SelectProjectModel:
         query = select(ProjectModel)
-        return cls.with_get_all_where_conditions(query, actor_id=actor_id, **kwargs)
+        return cls.with_get_all_where_conditions(query, actor_id=actor_id, **kwargs).order_by(
+            ProjectModel.created_at.desc()
+        )
 
     @classmethod
     def with_get_all_where_conditions(

@@ -22,3 +22,9 @@ class IOrganizationRepository(Protocol):
     async def get_by_id(
         self, organization_id: uuid.UUID, *, actor_id: uuid.UUID | None = None
     ) -> OrganizationModel: ...
+
+    @abstractmethod
+    async def get_by_enter_token(
+        self,
+        enter_token: str,
+    ) -> OrganizationModel: ...

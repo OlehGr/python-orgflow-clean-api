@@ -5,7 +5,6 @@ class Permission(enum.StrEnum):
     ALL = "all:all"
 
     ORGANIZATION_UPDATE = "organization:update"
-    ORGANIZATION_DELETE = "organization:delete"
 
     ORGANIZATION_MEMBER_CREATE = "organization_member:create"
     ORGANIZATION_MEMBER_UPDATE = "organization_member:update"

@@ -31,6 +31,24 @@ class OrganizationReadDto(EntityDto, frozen=True):
         )
 
 
+class OrganizationSettingsReadDto(EntityDto, frozen=True):
+    name: str
+    author_id: uuid.UUID
+    enter_token: str
+
+    @classmethod
+    def from_organization(cls, organization: OrganizationModel) -> "OrganizationSettingsReadDto":
+        return cls(
+            id=organization.id,
+            created_at=organization.created_at,
+            updated_at=organization.updated_at,
+            is_removed=organization.is_removed,
+            name=organization.name,
+            author_id=organization.author_id,
+            enter_token=organization.enter_token,
+        )
+
+
 class OrganizationCreateDto(msgspec.Struct, frozen=True):
     name: str
 

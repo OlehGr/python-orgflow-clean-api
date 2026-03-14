@@ -18,7 +18,9 @@ class OrganizationMemberSelectBuilder(BaseSelectBuilder):
         cls, *, actor_id: uuid.UUID | None, **kwargs: Unpack[OrganizationMembersGetParams]
     ) -> SelectOrganizationMemberModel:
         query = select(OrganizationMemberModel)
-        return cls.with_get_all_where_conditions(query, actor_id=actor_id, **kwargs)
+        return cls.with_get_all_where_conditions(query, actor_id=actor_id, **kwargs).order_by(
+            OrganizationMemberModel.created_at.desc()
+        )
 
     @classmethod
     def with_get_all_where_conditions(

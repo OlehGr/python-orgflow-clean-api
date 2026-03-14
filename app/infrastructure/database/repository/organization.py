@@ -2,12 +2,16 @@ import uuid
 from dataclasses import dataclass
 from typing import Unpack
 
+from sqlalchemy import select
+
 from app.core.application.dto.organization import OrganizationsGetParams
 from app.core.application.interfaces.common.events import IEntityEventBus
 from app.core.application.interfaces.repository.organization import IOrganizationRepository
 from app.core.exceptions.entity import EntityNotFoundError
 from app.core.models.organization import OrganizationModel
-from app.infrastructure.database.builders.organization import OrganizationSelectBuilder
+from app.infrastructure.database.builders.organization import (
+    OrganizationSelectBuilder,
+)
 from app.infrastructure.database.helpers.data import DataLoadHelper
 from app.infrastructure.database.internal.transaction import TransactionManager
 
@@ -27,6 +31,15 @@ class OrganizationRepository(IOrganizationRepository):
 
     async def get_by_id(self, organization_id: uuid.UUID, *, actor_id: uuid.UUID | None = None) -> OrganizationModel:
         query = OrganizationSelectBuilder.build_get_by_id_select(organization_id, actor_id)
+
+        async with self._tm.session() as session:
+            entity = await session.scalar(query)
+            if not entity:
+                raise EntityNotFoundError("Organization")
+            return entity
+
+    async def get_by_enter_token(self, enter_token: str) -> OrganizationModel:
+        query = select(OrganizationModel).where(OrganizationModel.enter_token == enter_token).limit(1)
 
         async with self._tm.session() as session:
             entity = await session.scalar(query)

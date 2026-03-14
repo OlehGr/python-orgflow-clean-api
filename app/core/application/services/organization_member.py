@@ -8,6 +8,7 @@ from app.core.application.dto.organization_member import (
 from app.core.application.interfaces.repository.organization import IOrganizationRepository
 from app.core.application.interfaces.repository.organization_member import IOrganizationMemberRepository
 from app.core.application.services.permission import PermissionService
+from app.core.exceptions.validation import ConflictError
 from app.core.models import OrganizationMemberModel
 from app.core.models.permission import Permission
 
@@ -19,7 +20,9 @@ class OrganizationMemberService:
 
     _permission_service: PermissionService
 
-    async def create_organization_member(self, data: OrganizationMemberCreateDto, *, actor_id: uuid.UUID) -> uuid.UUID:
+    async def create_organization_member(
+        self, data: OrganizationMemberCreateDto, *, actor_id: uuid.UUID | None
+    ) -> uuid.UUID:
         organization = await self._organization_repository.get_by_id(data.organization_id)
 
         if organization.author_id != actor_id:
@@ -40,6 +43,11 @@ class OrganizationMemberService:
     ) -> None:
         organization_member = await self._organization_member_repository.get_by_id(organization_member_id)
 
+        organization = await self._organization_repository.get_by_id(organization_member.organization_id)
+
+        if organization.author_id == organization_member.user_id:
+            raise ConflictError("Нельзя изменять роль создатель организации")
+
         await self._permission_service.ensure(
             Permission.ORGANIZATION_MEMBER_UPDATE,
             actor_id=actor_id,
@@ -52,6 +60,11 @@ class OrganizationMemberService:
 
     async def delete_organization_member(self, organization_member_id: uuid.UUID, *, actor_id: uuid.UUID) -> None:
         organization_member = await self._organization_member_repository.get_by_id(organization_member_id)
+
+        organization = await self._organization_repository.get_by_id(organization_member.organization_id)
+
+        if organization.author_id == organization_member.user_id:
+            raise ConflictError("Нельзя исключить создателя организации")
 
         await self._permission_service.ensure(
             Permission.ORGANIZATION_MEMBER_DELETE,

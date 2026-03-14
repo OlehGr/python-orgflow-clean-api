@@ -15,7 +15,7 @@ class UserSelectBuilder(BaseSelectBuilder):
     @classmethod
     def build_get_all_select(cls, **kwargs: Unpack[UsersGetParams]) -> SelectUserModel:
         query = select(UserModel)
-        return cls.with_get_all_where_conditions(query, **kwargs)
+        return cls.with_get_all_where_conditions(query, **kwargs).order_by(UserModel.created_at.desc())
 
     @classmethod
     def with_get_all_where_conditions(cls, query: Select, *, user__normal_email: str | None = None) -> Select:

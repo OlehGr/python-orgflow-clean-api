@@ -9,8 +9,16 @@ from litestar.params import Parameter
 from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 
 from app.core.application.dto.base import Paged, Paginated
-from app.core.application.dto.organization import OrganizationCreateDto, OrganizationReadDto, OrganizationUpdateDto
-from app.core.application.interfaces.projection.organization import IOrganizationProjection
+from app.core.application.dto.organization import (
+    OrganizationCreateDto,
+    OrganizationReadDto,
+    OrganizationSettingsReadDto,
+    OrganizationUpdateDto,
+)
+from app.core.application.interfaces.projection.organization import (
+    IOrganizationProjection,
+    IOrganizationSettingsProjection,
+)
 from app.core.application.services.organization import OrganizationService
 
 
@@ -90,3 +98,39 @@ class OrganizationController(Controller):
         organization_id: uuid.UUID,
     ) -> OrganizationReadDto:
         return await organization_projection.get_by_id(organization_id, actor_id=request.user)
+
+    @get("/{organization_id:uuid}/settings", status_code=HTTP_200_OK)
+    @inject
+    async def get_by_id_settings(
+        self,
+        organization_settings_projection: FromDishka[IOrganizationSettingsProjection],
+        request: Request,
+        organization_id: uuid.UUID,
+    ) -> OrganizationSettingsReadDto:
+        return await organization_settings_projection.get_by_id(organization_id, actor_id=request.user)
+
+    @put("/{organization_id:uuid}/reset_enter_token", status_code=HTTP_200_OK)
+    @inject
+    async def reset_enter_token(
+        self,
+        organization_settings_projection: FromDishka[IOrganizationSettingsProjection],
+        organization_service: FromDishka[OrganizationService],
+        request: Request,
+        organization_id: uuid.UUID,
+    ) -> OrganizationSettingsReadDto:
+        await organization_service.reset_organization_enter_token(organization_id, actor_id=request.user)
+        return await organization_settings_projection.get_by_id(organization_id, actor_id=None)
+
+    @post("/enter/{enter_token:str}", status_code=HTTP_200_OK)
+    @inject
+    async def enter_in_organization(
+        self,
+        organization_projection: FromDishka[IOrganizationProjection],
+        organization_service: FromDishka[OrganizationService],
+        request: Request,
+        enter_token: str,
+    ) -> OrganizationReadDto:
+        organization_id = await organization_service.let_user_in_organization(
+            enter_token=enter_token, actor_id=request.user
+        )
+        return await organization_projection.get_by_id(organization_id, actor_id=None)
