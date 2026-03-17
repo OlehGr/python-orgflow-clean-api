@@ -18,7 +18,7 @@ class BaseModel(MappedAsDataclass, DeclarativeBase):
 class IdModel(BaseModel):
     __abstract__ = True
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, unique=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
 
 
 class IdDto(msgspec.Struct, frozen=True):
