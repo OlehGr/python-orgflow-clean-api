@@ -33,8 +33,9 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff",
-    "ty",
+    "mypy>=1.19.1",
+    "ruff>=0.15.2",
+    "ty>=0.0.23",
 ]
 api = [
     "aio-pika>=9.6.1",
@@ -125,6 +126,12 @@ isort.no-lines-before = ["standard-library", "local-folder"]
 exclude = [
     "**/migrations",
 ]
+
+[tool.mypy]
+disable_error_code = ["import-untyped"]
+exclude = ["migrations"]
+exclude_gitignore = true
+
 
 [tool.pytest]
 minversion = "9.0"

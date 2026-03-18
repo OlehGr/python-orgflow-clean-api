@@ -18,7 +18,7 @@ class UserRepository(IUserRepository):
     _entity_event_bus: IEntityEventBus
 
     async def get_all(self, **kwargs: Unpack[UsersGetParams]) -> list[UserModel]:
-        query = UserSelectBuilder.build_get_all_select(**kwargs)
+        query = UserSelectBuilder.build_get_all_select(actor_id=None, **kwargs)
 
         async with self._tm.session() as session:
             return await DataLoadHelper.load_models_list(query, session)

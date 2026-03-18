@@ -21,7 +21,7 @@ class OrganizationMemberProjection(IOrganizationMemberProjection):
     _tm: TransactionManager
 
     async def get_paged(
-        self, actor_id: uuid.UUID, page: int = 1, limit: int = 50, **kwargs: Unpack[OrganizationMembersGetParams]
+        self, *, actor_id: uuid.UUID, page: int = 1, limit: int = 50, **kwargs: Unpack[OrganizationMembersGetParams]
     ) -> Paged[OrganizationMemberReadDto]:
         plain_query = OrganizationMemberSelectBuilder.build_get_all_select(actor_id=actor_id, **kwargs)
         paged_query = OrganizationMemberSelectBuilder.with_paged_limit(plain_query, page=page, limit=limit)
@@ -32,7 +32,7 @@ class OrganizationMemberProjection(IOrganizationMemberProjection):
             return Paged.to_paged(reads, page=page, limit=limit)
 
     async def get_paginated(
-        self, actor_id: uuid.UUID, page: int = 1, limit: int = 50, **kwargs: Unpack[OrganizationMembersGetParams]
+        self, *, actor_id: uuid.UUID, page: int = 1, limit: int = 50, **kwargs: Unpack[OrganizationMembersGetParams]
     ) -> Paginated[OrganizationMemberReadDto]:
         plain_query = OrganizationMemberSelectBuilder.build_get_all_select(actor_id=actor_id, **kwargs)
         paginated_query = OrganizationMemberSelectBuilder.with_pagination(plain_query, page=page, limit=limit)

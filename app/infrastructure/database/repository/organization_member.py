@@ -20,7 +20,7 @@ class OrganizationMemberRepository(IOrganizationMemberRepository):
     _entity_event_bus: IEntityEventBus
 
     async def get_all(
-        self, actor_id: uuid.UUID | None = None, **kwargs: Unpack[OrganizationMembersGetParams]
+        self, *, actor_id: uuid.UUID | None = None, **kwargs: Unpack[OrganizationMembersGetParams]
     ) -> list[OrganizationMemberModel]:
         query = OrganizationMemberSelectBuilder.build_get_all_select(actor_id=actor_id, **kwargs)
 

@@ -20,8 +20,10 @@ from app.infrastructure.database.internal.transaction import TransactionManager
 class UserProjection(IUserProjection):
     _tm: TransactionManager
 
-    async def get_paged(self, page: int = 1, limit: int = 50, **kwargs: Unpack[UsersGetParams]) -> Paged[UserReadDto]:
-        plain_query = UserSelectBuilder.build_get_all_select(**kwargs)
+    async def get_paged(
+        self, *, actor_id: uuid.UUID, page: int = 1, limit: int = 50, **kwargs: Unpack[UsersGetParams]
+    ) -> Paged[UserReadDto]:
+        plain_query = UserSelectBuilder.build_get_all_select(actor_id=actor_id, **kwargs)
         paged_query = UserSelectBuilder.with_paged_limit(plain_query, page=page, limit=limit)
 
         async with self._tm.session() as session:
@@ -30,12 +32,12 @@ class UserProjection(IUserProjection):
             return Paged.to_paged(reads, page=page, limit=limit)
 
     async def get_paginated(
-        self, page: int = 1, limit: int = 50, **kwargs: Unpack[UsersGetParams]
+        self, *, actor_id: uuid.UUID, page: int = 1, limit: int = 50, **kwargs: Unpack[UsersGetParams]
     ) -> Paginated[UserReadDto]:
-        plain_query = UserSelectBuilder.build_get_all_select(**kwargs)
+        plain_query = UserSelectBuilder.build_get_all_select(actor_id=actor_id, **kwargs)
         paginated_query = UserSelectBuilder.with_pagination(plain_query, page=page, limit=limit)
         count_query = UserSelectBuilder.to_count_query(
-            UserSelectBuilder.with_get_all_where_conditions(select(UserModel.id), **kwargs)
+            UserSelectBuilder.with_get_all_where_conditions(select(UserModel.id), actor_id=actor_id, **kwargs)
         )
 
         async with self._tm.session() as session:

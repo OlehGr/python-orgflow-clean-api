@@ -1,7 +1,7 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from dishka import AsyncContainer, make_async_container
+from dishka import AsyncContainer, Provider, make_async_container
 from faststream.rabbit import RabbitBroker
 from litestar import Litestar
 
@@ -31,7 +31,7 @@ async def lifespan(app: Litestar) -> AsyncIterator[None]:
         await container.close()
 
 
-providers = [
+providers: list[Provider] = [
     BaseRequiredInjectionsProvider(),
     DatabaseInjectionsProvider(),
     RabbitInjectionsProvider(),

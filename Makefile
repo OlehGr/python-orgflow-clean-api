@@ -1,5 +1,6 @@
 default: lint
 
 lint:
-	uv run ruff check --fix
+	uv run -m ruff check --fix
 	uv run -m ty check
+	uv run -m mypy .

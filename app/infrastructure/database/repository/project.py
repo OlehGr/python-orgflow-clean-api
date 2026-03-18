@@ -18,7 +18,7 @@ class ProjectRepository(IProjectRepository):
     _entity_event_bus: IEntityEventBus
 
     async def get_all(
-        self, actor_id: uuid.UUID | None = None, **kwargs: Unpack[ProjectsGetParams]
+        self, *, actor_id: uuid.UUID | None = None, **kwargs: Unpack[ProjectsGetParams]
     ) -> list[ProjectModel]:
         query = ProjectSelectBuilder.build_get_all_select(actor_id=actor_id, **kwargs)
 

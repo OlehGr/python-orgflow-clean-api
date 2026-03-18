@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import field
 from datetime import datetime
 from typing import TypedDict, TypeVar
 
@@ -28,9 +27,10 @@ class EntityModel(IdModel):
     created_at: Mapped[datetime] = mapped_column(index=True)
     updated_at: Mapped[datetime] = mapped_column(index=True, onupdate=get_native_utc_now)
 
-    __is_created: bool = field(default=False, init=False)
+    __is_created: bool = False
 
-    def __post_init__(self) -> None:
+    def __init__(self, **kw) -> None:
+        super().__init__(**kw)
         self.__is_created = True
 
     def _resolve_entity_save_subject(

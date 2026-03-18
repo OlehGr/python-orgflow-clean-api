@@ -51,23 +51,6 @@ class OrganizationSelectBuilder(BaseSelectBuilder):
             actor_organization_ids_cte, actor_organization_ids_cte.c.organization_id == OrganizationModel.id
         )
 
-    @classmethod
-    def build_actor_organization_settings_ids_select(cls, actor_id: uuid.UUID) -> Select:
-        return select(OrganizationMemberModel.organization_id).where(
-            OrganizationMemberModel.user_id == actor_id, OrganizationMemberModel.role == OrganizationMemberRole.ADMIN
-        )
-
-    @classmethod
-    def with_actor_organization_settings_where_conditions(cls, query: Select, actor_id: uuid.UUID | None) -> Select:
-        if actor_id is None:
-            return query
-
-        actor_organization_ids_cte = cls.build_actor_organization_settings_ids_select(actor_id).cte()
-
-        return query.join(
-            actor_organization_ids_cte, actor_organization_ids_cte.c.organization_id == OrganizationModel.id
-        )
-
 
 class OrganizationSettingsSelectBuilder(BaseSelectBuilder):
     @classmethod

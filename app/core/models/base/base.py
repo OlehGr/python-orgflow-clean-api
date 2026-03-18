@@ -2,13 +2,13 @@ import uuid
 
 import msgspec
 from sqlalchemy import MetaData
-from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column, registry
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, registry
 
 
 mapper_registry = registry(metadata=MetaData())
 
 
-class BaseModel(MappedAsDataclass, DeclarativeBase):
+class BaseModel(DeclarativeBase):
     registry = mapper_registry
     metadata = mapper_registry.metadata
 

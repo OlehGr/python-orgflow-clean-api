@@ -6,6 +6,7 @@ from litestar import Controller, Request, get, post, put
 from litestar.params import Parameter
 from litestar.status_codes import HTTP_200_OK
 
+from app.core.application.dto.base import Paged, Paginated
 from app.core.application.dto.file import FileCreateStreamData
 from app.core.application.dto.user import UserEmailDto, UserReadDto, UserUpdateDto
 from app.core.application.interfaces.projection.user import IUserProjection
@@ -16,6 +17,32 @@ from app.presentation.shared.schemas.base import MessageResultDto
 class UserController(Controller):
     path = "/user"
     tags: Sequence[str] | None = ["User"]
+
+    @get(status_code=HTTP_200_OK)
+    @inject
+    async def get_paged(
+        self,
+        user_projection: FromDishka[IUserProjection],
+        request: Request,
+        page: int = Parameter(default=1, required=False),
+        limit: int = Parameter(default=50, required=False),
+    ) -> Paged[UserReadDto]:
+        return await user_projection.get_paged(
+            actor_id=request.user,
+            page=page,
+            limit=limit,
+        )
+
+    @get("/paginated", status_code=HTTP_200_OK)
+    @inject
+    async def get_paginated(
+        self,
+        user_projection: FromDishka[IUserProjection],
+        request: Request,
+        page: int = Parameter(default=1, required=False),
+        limit: int = Parameter(default=50, required=False),
+    ) -> Paginated[UserReadDto]:
+        return await user_projection.get_paginated(actor_id=request.user, page=page, limit=limit)
 
     @post("/request-email-change", status_code=HTTP_200_OK)
     @inject

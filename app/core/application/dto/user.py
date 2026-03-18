@@ -2,12 +2,16 @@ from typing import NotRequired, Optional, TypedDict
 
 import msgspec
 
+from app.core.application.dto.base import LimitationGetParams
 from app.core.models import FileModel, UserModel
 from app.core.models.base import EntityDto
 
 
 class UsersGetParams(TypedDict):
     user__normal_email: NotRequired[str | None]
+
+
+class UsersWithLimitationGetParams(UsersGetParams, LimitationGetParams): ...
 
 
 class UserReadDto(EntityDto, frozen=True):
