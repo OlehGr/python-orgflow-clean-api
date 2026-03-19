@@ -10,7 +10,7 @@ from app.core.application.services.entity_event import EntityEventService
 from app.core.config.env import env_config
 from app.infrastructure.database.providers import DatabaseInjectionsProvider
 from app.infrastructure.rabbit.broker import RabbitInjectionsProvider
-from app.presentation.server_api.app import create_litestar_app
+from app.presentation.app_api.app import create_litestar_app
 from app.run.shared.providers import BaseRequiredInjectionsProvider
 from .providers import AppInjectionsProvider, LocalMockInjectionsProvider
 

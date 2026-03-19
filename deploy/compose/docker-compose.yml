@@ -1,10 +1,10 @@
 version: "3.9"
 
 services:
-  some-app-api:
+  app-api:
     build:
       context: ../../
-      dockerfile: ./deploy/server-api.Dockerfile
+      dockerfile: ./deploy/app-api.Dockerfile
     restart: unless-stopped
     networks:
       - web

@@ -7,7 +7,7 @@ from app.core.config import env_config
 
 if __name__ == "__main__":
     Granian(
-        target="app.run.server_api.app:app",
+        target="app.run.app_api.app:app",
         address="0.0.0.0",
         port=env_config.server_port,
         loop=Loops.uvloop,

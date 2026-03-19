@@ -3,4 +3,4 @@
 set -e
 
 alembic upgrade head
-python -m app.run.server_api.prod
+python -m app.run.app_api.prod

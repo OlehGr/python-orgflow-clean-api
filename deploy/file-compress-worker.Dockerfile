@@ -24,6 +24,6 @@ COPY . .
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-RUN ["chmod", "+x", "/app/server-api-entrypoint.sh"]
+RUN ["chmod", "+x", "/app/app-api-entrypoint.sh"]
 
 ENTRYPOINT ["python", "-m", "faststream", "run", "app.run.file_compress_worker.app:app"]
