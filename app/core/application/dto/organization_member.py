@@ -6,7 +6,7 @@ import msgspec
 from app.core.application.dto.base import LimitationGetParams
 from app.core.application.dto.user import UserReadDto
 from app.core.models import OrganizationMemberModel
-from app.core.models.base import EntityDto
+from app.core.models.entity import EntityDto
 from app.core.models.organization_member import OrganizationMemberRole
 
 

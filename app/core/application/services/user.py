@@ -46,7 +46,7 @@ class UserService:
 
     async def update_user(self, user_id: uuid.UUID, data: UserUpdateDto) -> None:
         user = await self._user_repository.get_by_id(user_id)
-        user.update(name=data.name)
+        user.update(name=data.name, actor_id=user_id)
         await self._user_repository.save(user)
 
     async def sign_up_user(self, data: UserSignUpDto) -> uuid.UUID:

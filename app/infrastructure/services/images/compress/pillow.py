@@ -4,20 +4,20 @@ from typing import ClassVar
 
 from PIL import Image
 
-from app.core.application.dto.file import ImagerCompressResult
+from app.core.application.dto.file import ImageCompressResult
 from app.core.application.interfaces.services.file import IImageCompressor
 
 
 class PillowImageCompressor(IImageCompressor):
     quality: ClassVar[int] = 75
 
-    async def compress_image(self, *, image_data: bytes, image_name: str) -> ImagerCompressResult:
+    async def compress_image(self, *, image_data: bytes, image_name: str) -> ImageCompressResult:
 
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
 
         optimized_bytes = self._optimize_image(image)
 
-        return ImagerCompressResult(
+        return ImageCompressResult(
             optimized_data=optimized_bytes,
             file_name=str(Path(image_name).with_suffix(".webp")),
             content_type="image/webp",

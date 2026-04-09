@@ -4,7 +4,8 @@ from urllib.parse import urlparse
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.models.base import EntityDto, EntityModel, get_native_utc_now
+from app.core.models.base import get_native_utc_now
+from app.core.models.entity import EntityDto, EntityModel
 from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
@@ -28,10 +29,10 @@ class FileModel(EntityModel):
         name: str,
         size: int,
         content_type: str,
-        author_id: uuid.UUID,
+        actor_id: uuid.UUID,
         hash_: str | None = None,
     ) -> "FileModel":
-        return cls(
+        entity = cls(
             is_removed=False,
             created_at=get_native_utc_now(),
             updated_at=get_native_utc_now(),
@@ -40,18 +41,27 @@ class FileModel(EntityModel):
             name=cls.normalize_file_name(name),
             size=size,
             content_type=content_type,
-            author_id=author_id,
+            author_id=actor_id,
             hash=hash_,
         )
+        entity.add_events(entity.to_entity_subject_event(EntityEventSubject.file_create, actor_id=actor_id))
+        return entity
 
-    def set_file_hash(self, hash_: str) -> None:
+    def set_file_hash(self, hash_: str, *, actor_id: uuid.UUID | None) -> None:
         self.hash = hash_
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.file_update, actor_id=actor_id))
 
-    def set_image_data(self, *, name: str, content_type: str, url: str, size: int) -> None:
+    def set_image_data(
+        self, *, name: str, content_type: str, url: str, size: int, actor_id: uuid.UUID | None
+    ) -> None:
         self.name = name
         self.content_type = content_type
         self.url = url
         self.size = size
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.file_update, actor_id=actor_id))
+
+    def delete(self, *, actor_id: uuid.UUID | None) -> None:
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.file_delete, actor_id=actor_id))
 
     @staticmethod
     def normalize_file_name(name: str) -> str:
@@ -66,24 +76,15 @@ class FileModel(EntityModel):
         return urlparse(self.url).path.lstrip("/").split("/", 1)[1]
 
     def to_entity_subject_event(
-        self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
+        self, subject: EntityEventSubject, *, actor_id: uuid.UUID | None
     ) -> EntityEvent["FileEventDto"]:
         return EntityEvent(
-            producer_id=producer_id,
+            producer_id=actor_id,
             subject=subject,
             entity=EntityEventEntity.file,
             entity_id=self.id,
             data=FileEventDto.from_file(self),
         )
-
-    def to_entity_save_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["FileEventDto"]:
-        return self.to_entity_subject_event(
-            self._resolve_entity_save_subject(EntityEventSubject.file_create, EntityEventSubject.file_update),
-            producer_id=producer_id,
-        )
-
-    def to_entity_delete_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["FileEventDto"]:
-        return self.to_entity_subject_event(EntityEventSubject.file_delete, producer_id=producer_id)
 
 
 class FileEventDto(EntityDto, frozen=True):
@@ -91,6 +92,7 @@ class FileEventDto(EntityDto, frozen=True):
     name: str
     size: int
     content_type: str
+    hash: str | None
     author_id: uuid.UUID
 
     @classmethod
@@ -104,5 +106,6 @@ class FileEventDto(EntityDto, frozen=True):
             size=file.size,
             content_type=file.content_type,
             name=file.name,
+            hash=file.hash,
             author_id=file.author_id,
         )

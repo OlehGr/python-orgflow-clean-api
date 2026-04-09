@@ -24,10 +24,10 @@ class OrganizationService:
     _permission_service: PermissionService
 
     async def create_organization(self, data: OrganizationCreateDto, *, actor_id: uuid.UUID) -> uuid.UUID:
-        organization = OrganizationModel.create(name=data.name, author_id=actor_id)
+        organization = OrganizationModel.create(name=data.name, actor_id=actor_id)
 
         async with self._tm.transaction():
-            await self._organization_repository.save(organization, actor_id=actor_id)
+            await self._organization_repository.save(organization)
 
             await self._organization_member_service.create_organization_member(
                 OrganizationMemberCreateDto(
@@ -47,9 +47,9 @@ class OrganizationService:
 
         organization = await self._organization_repository.get_by_id(organization_id, actor_id=actor_id)
 
-        organization.update(name=data.name)
+        organization.update(name=data.name, actor_id=actor_id)
 
-        await self._organization_repository.save(organization, actor_id=actor_id)
+        await self._organization_repository.save(organization)
 
     async def delete_organization(self, organization_id: uuid.UUID, *, actor_id: uuid.UUID) -> None:
         organization = await self._organization_repository.get_by_id(organization_id, actor_id=actor_id)
@@ -57,7 +57,8 @@ class OrganizationService:
         if organization.author_id != actor_id:
             raise ConflictError("Только создатель организации может удалить её")
 
-        await self._organization_repository.delete(organization, actor_id=actor_id)
+        organization.delete(actor_id=actor_id)
+        await self._organization_repository.delete(organization)
 
     async def reset_organization_enter_token(self, organization_id: uuid.UUID, *, actor_id: uuid.UUID) -> None:
         await self._permission_service.ensure(
@@ -66,9 +67,9 @@ class OrganizationService:
 
         organization = await self._organization_repository.get_by_id(organization_id, actor_id=actor_id)
 
-        organization.reset_enter_token()
+        organization.reset_enter_token(actor_id=actor_id)
 
-        await self._organization_repository.save(organization, actor_id=actor_id)
+        await self._organization_repository.save(organization)
 
     async def let_user_in_organization(self, *, enter_token: str, actor_id: uuid.UUID) -> uuid.UUID:
         organization = await self._organization_repository.get_by_enter_token(enter_token)

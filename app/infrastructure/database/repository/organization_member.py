@@ -55,16 +55,12 @@ class OrganizationMemberRepository(IOrganizationMemberRepository):
                 raise EntityNotFoundError("OrganizationMember")
             return entity
 
-    async def save(self, organization_member: OrganizationMemberModel, *, actor_id: uuid.UUID | None) -> None:
+    async def save(self, organization_member: OrganizationMemberModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(organization_member)
-            tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(organization_member.to_entity_save_event(producer_id=actor_id))
-            )
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*organization_member.pop_events()))
 
-    async def delete(self, organization_member: OrganizationMemberModel, *, actor_id: uuid.UUID | None) -> None:
+    async def delete(self, organization_member: OrganizationMemberModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.delete(organization_member)
-            tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(organization_member.to_entity_delete_event(producer_id=actor_id))
-            )
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*organization_member.pop_events()))

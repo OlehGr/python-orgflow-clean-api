@@ -21,9 +21,9 @@ class ProjectService:
             organization_id=data.organization_id,
         )
 
-        project = ProjectModel.create(name=data.name, organization_id=data.organization_id, author_id=actor_id)
+        project = ProjectModel.create(name=data.name, organization_id=data.organization_id, actor_id=actor_id)
 
-        await self._project_repository.save(project, actor_id=actor_id)
+        await self._project_repository.save(project)
 
         return project.id
 
@@ -36,9 +36,9 @@ class ProjectService:
             organization_id=project.organization_id,
         )
 
-        project.update(name=data.name)
+        project.update(name=data.name, actor_id=actor_id)
 
-        await self._project_repository.save(project, actor_id=actor_id)
+        await self._project_repository.save(project)
 
     async def delete_project(self, project_id: uuid.UUID, *, actor_id: uuid.UUID) -> None:
         project = await self._project_repository.get_by_id(project_id, actor_id=actor_id)
@@ -49,4 +49,5 @@ class ProjectService:
             organization_id=project.organization_id,
         )
 
-        await self._project_repository.delete(project, actor_id=actor_id)
+        project.delete(actor_id=actor_id)
+        await self._project_repository.delete(project)

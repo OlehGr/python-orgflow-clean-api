@@ -5,8 +5,8 @@ from dishka import AsyncContainer, Provider, make_async_container
 from faststream.rabbit import RabbitBroker
 from litestar import Litestar
 
+from app.core.application.listeners.entity_event_save import EntityEventSaveListener
 from app.core.application.services.auth import AuthService
-from app.core.application.services.entity_event import EntityEventService
 from app.core.config.env import env_config
 from app.infrastructure.database.providers import DatabaseInjectionsProvider
 from app.infrastructure.rabbit.broker import RabbitInjectionsProvider
@@ -22,7 +22,7 @@ async def lifespan(app: Litestar) -> AsyncIterator[None]:
     rabbit_broker = await container.get(RabbitBroker)
     await rabbit_broker.connect()
 
-    await container.get(EntityEventService)
+    await container.get(EntityEventSaveListener)
 
     try:
         app.state.auth_service = await container.get(AuthService)

@@ -7,7 +7,7 @@ from app.core.application.dto.base import LimitationGetParams
 from app.core.application.dto.organization import OrganizationReadDto
 from app.core.application.dto.user import UserReadDto
 from app.core.models import ProjectModel
-from app.core.models.base import EntityDto
+from app.core.models.entity import EntityDto
 
 
 class ProjectsGetParams(TypedDict):

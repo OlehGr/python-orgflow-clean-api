@@ -35,11 +35,11 @@ class FileService:
             name=file_name,
             size=result.file_size,
             content_type=data.content_type,
-            author_id=actor_id,
+            actor_id=actor_id,
         )
 
         async with self._tm.transaction() as tx:
-            await self._file_repository.save(file, actor_id=actor_id)
+            await self._file_repository.save(file)
             tx.add_async_after_commit(lambda: self._file_compress_producer.send(file.id))
 
         return file.id
@@ -77,10 +77,11 @@ class FileOptimizeService:
             content_type=image_compress_result.content_type,
             url=compressed_upload.file_url,
             size=compressed_upload.file_size,
+            actor_id=None,
         )
 
         image_hash = await self._image_hasher.hash_image(image_compress_result.optimized_data)
 
-        file.set_file_hash(image_hash)
+        file.set_file_hash(image_hash, actor_id=None)
 
-        await self._file_repository.save(file, actor_id=None)
+        await self._file_repository.save(file)

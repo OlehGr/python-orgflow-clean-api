@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.exceptions.permission import PermissionDeniedError
-from app.core.models.base import EntityDto, EntityModel
+from app.core.models.entity import EntityDto, EntityModel
 from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 from app.core.models.permission import Permission
 
@@ -40,12 +40,18 @@ class OrganizationMemberModel(EntityModel):
         *,
         user_id: uuid.UUID,
         organization_id: uuid.UUID,
+        actor_id: uuid.UUID | None,
         role: OrganizationMemberRole = OrganizationMemberRole.MEMBER,
     ) -> "OrganizationMemberModel":
-        return cls(**cls._generate_base_args(), user_id=user_id, organization_id=organization_id, role=role)
+        entity = cls(**cls._generate_base_args(), user_id=user_id, organization_id=organization_id, role=role)
+        entity.add_events(
+            entity.to_entity_subject_event(EntityEventSubject.organization_member_create, actor_id=actor_id)
+        )
+        return entity
 
-    def set_role(self, role: OrganizationMemberRole) -> None:
+    def set_role(self, role: OrganizationMemberRole, *, actor_id: uuid.UUID | None) -> None:
         self.role = role
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.organization_member_update, actor_id=actor_id))
 
     def ensure_permission(self, permission: Permission) -> None:
         current_permissions = ROLE_PERMISSIONS[self.role]
@@ -56,28 +62,19 @@ class OrganizationMemberModel(EntityModel):
         if permission not in current_permissions:
             raise PermissionDeniedError(f"Доступ к {permission} запрещен")
 
+    def delete(self, *, actor_id: uuid.UUID | None) -> None:
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.organization_member_delete, actor_id=actor_id))
+
     def to_entity_subject_event(
-        self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
+        self, subject: EntityEventSubject, *, actor_id: uuid.UUID | None
     ) -> EntityEvent["OrganizationMemberEventDto"]:
         return EntityEvent(
-            producer_id=producer_id,
+            producer_id=actor_id,
             subject=subject,
             entity=EntityEventEntity.organization_member,
             entity_id=self.id,
             data=OrganizationMemberEventDto.from_organization_member(self),
         )
-
-    def to_entity_save_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["OrganizationMemberEventDto"]:
-        return self.to_entity_subject_event(
-            self._resolve_entity_save_subject(
-                EntityEventSubject.organization_member_create,
-                EntityEventSubject.organization_member_update,
-            ),
-            producer_id=producer_id,
-        )
-
-    def to_entity_delete_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["OrganizationMemberEventDto"]:
-        return self.to_entity_subject_event(EntityEventSubject.organization_member_delete, producer_id=producer_id)
 
 
 class OrganizationMemberEventDto(EntityDto, frozen=True):

@@ -35,9 +35,9 @@ class UserRepository(IUserRepository):
     async def save(self, user: UserModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(user)
-            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(user.to_entity_save_event()))
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*user.pop_events()))
 
     async def delete(self, user: UserModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(user)
-            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(user.to_entity_delete_event()))
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*user.pop_events()))

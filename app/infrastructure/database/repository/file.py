@@ -14,12 +14,10 @@ class FileRepository(IFileRepository):
     _tm: TransactionManager
     _entity_event_bus: IEntityEventBus
 
-    async def save(self, file: FileModel, *, actor_id: uuid.UUID | None) -> None:
+    async def save(self, file: FileModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(file)
-            tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(file.to_entity_save_event(producer_id=actor_id))
-            )
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*file.pop_events()))
 
     async def get_by_id(self, file_id: uuid.UUID) -> FileModel:
         query = FileSelectBuilder.build_get_by_id_select(file_id)

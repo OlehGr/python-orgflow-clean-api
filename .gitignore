@@ -11,6 +11,7 @@ wheels/
 .DS_Store
 .idea
 .vscode
+.codex
 
 
 # Virtual environments

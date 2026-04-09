@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.models.base import EntityDto, EntityModel
+from app.core.models.entity import EntityDto, EntityModel
 from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
@@ -15,31 +15,28 @@ class ProjectModel(EntityModel):
     organization_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("organization.id", ondelete="CASCADE"), index=True)
 
     @classmethod
-    def create(cls, *, name: str, organization_id: uuid.UUID, author_id: uuid.UUID) -> "ProjectModel":
-        return cls(**cls._generate_base_args(), name=name, organization_id=organization_id, author_id=author_id)
+    def create(cls, *, name: str, organization_id: uuid.UUID, actor_id: uuid.UUID) -> "ProjectModel":
+        entity = cls(**cls._generate_base_args(), name=name, organization_id=organization_id, author_id=actor_id)
+        entity.add_events(entity.to_entity_subject_event(EntityEventSubject.project_create, actor_id=actor_id))
+        return entity
 
-    def update(self, *, name: str) -> None:
+    def update(self, *, name: str, actor_id: uuid.UUID | None) -> None:
         self.name = name
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.project_update, actor_id=actor_id))
+
+    def delete(self, *, actor_id: uuid.UUID | None) -> None:
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.project_delete, actor_id=actor_id))
 
     def to_entity_subject_event(
-        self, subject: EntityEventSubject, *, producer_id: uuid.UUID | None
+        self, subject: EntityEventSubject, *, actor_id: uuid.UUID | None
     ) -> EntityEvent["ProjectEventDto"]:
         return EntityEvent(
-            producer_id=producer_id,
+            producer_id=actor_id,
             subject=subject,
             entity=EntityEventEntity.project,
             entity_id=self.id,
             data=ProjectEventDto.from_project(self),
         )
-
-    def to_entity_save_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["ProjectEventDto"]:
-        return self.to_entity_subject_event(
-            self._resolve_entity_save_subject(EntityEventSubject.project_create, EntityEventSubject.project_update),
-            producer_id=producer_id,
-        )
-
-    def to_entity_delete_event(self, *, producer_id: uuid.UUID | None) -> EntityEvent["ProjectEventDto"]:
-        return self.to_entity_subject_event(EntityEventSubject.project_delete, producer_id=producer_id)
 
 
 class ProjectEventDto(EntityDto, frozen=True):

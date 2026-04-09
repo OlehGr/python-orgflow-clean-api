@@ -34,16 +34,12 @@ class ProjectRepository(IProjectRepository):
                 raise EntityNotFoundError("Project")
             return entity
 
-    async def save(self, project: ProjectModel, *, actor_id: uuid.UUID | None) -> None:
+    async def save(self, project: ProjectModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.merge(project)
-            tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(project.to_entity_save_event(producer_id=actor_id))
-            )
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*project.pop_events()))
 
-    async def delete(self, project: ProjectModel, *, actor_id: uuid.UUID | None) -> None:
+    async def delete(self, project: ProjectModel) -> None:
         async with self._tm.transaction() as tx:
             await tx.delete(project)
-            tx.add_async_after_commit(
-                lambda: self._entity_event_bus.publish(project.to_entity_delete_event(producer_id=actor_id))
-            )
+            tx.add_async_after_commit(lambda: self._entity_event_bus.publish(*project.pop_events()))

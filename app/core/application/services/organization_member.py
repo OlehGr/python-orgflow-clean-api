@@ -31,10 +31,10 @@ class OrganizationMemberService:
             )
 
         organization_member = OrganizationMemberModel.create(
-            user_id=data.user_id, organization_id=data.organization_id, role=data.role
+            user_id=data.user_id, organization_id=data.organization_id, role=data.role, actor_id=actor_id
         )
 
-        await self._organization_member_repository.save(organization_member, actor_id=actor_id)
+        await self._organization_member_repository.save(organization_member)
 
         return organization_member.id
 
@@ -54,9 +54,9 @@ class OrganizationMemberService:
             organization_id=organization_member.organization_id,
         )
 
-        organization_member.set_role(data.role)
+        organization_member.set_role(data.role, actor_id=actor_id)
 
-        await self._organization_member_repository.save(organization_member, actor_id=actor_id)
+        await self._organization_member_repository.save(organization_member)
 
     async def delete_organization_member(self, organization_member_id: uuid.UUID, *, actor_id: uuid.UUID) -> None:
         organization_member = await self._organization_member_repository.get_by_id(organization_member_id)
@@ -72,4 +72,5 @@ class OrganizationMemberService:
             organization_id=organization_member.organization_id,
         )
 
-        await self._organization_member_repository.delete(organization_member, actor_id=actor_id)
+        organization_member.delete(actor_id=actor_id)
+        await self._organization_member_repository.delete(organization_member)

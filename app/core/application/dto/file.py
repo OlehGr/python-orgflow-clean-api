@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 
 from app.core.models import FileModel
-from app.core.models.base import EntityDto
+from app.core.models.entity import EntityDto
 
 
 class FileReadDto(EntityDto, frozen=True):
@@ -58,7 +58,7 @@ class FileUploadResult:
 
 
 @dataclass(frozen=True)
-class ImagerCompressResult:
+class ImageCompressResult:
     optimized_data: bytes
     content_type: str
     file_name: str

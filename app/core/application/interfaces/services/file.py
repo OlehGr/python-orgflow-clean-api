@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from app.core.application.dto.file import FileUploadData, FileUploadResult, FileUploadStreamData, ImagerCompressResult
+from app.core.application.dto.file import FileUploadData, FileUploadResult, FileUploadStreamData, ImageCompressResult
 from app.core.models import FileModel
 
 
@@ -18,7 +18,7 @@ class IFileStorage(Protocol):
 
 class IImageCompressor(Protocol):
     @abstractmethod
-    async def compress_image(self, *, image_data: bytes, image_name: str) -> ImagerCompressResult: ...
+    async def compress_image(self, *, image_data: bytes, image_name: str) -> ImageCompressResult: ...
 
 
 class IImageHasher(Protocol):

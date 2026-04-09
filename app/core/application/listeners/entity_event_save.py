@@ -9,7 +9,7 @@ from app.core.models.entity_event import EntityEvent
 
 
 @dataclass
-class EntityEventService:
+class EntityEventSaveListener:
     _entity_event_bus: IEntityEventBus
     _entity_event_repository: IEntityEventRepository
 

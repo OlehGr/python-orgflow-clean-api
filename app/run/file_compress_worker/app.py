@@ -5,7 +5,7 @@ from dishka import make_container
 from faststream import FastStream
 from faststream.rabbit import RabbitBroker
 
-from app.core.application.services.entity_event import EntityEventService
+from app.core.application.listeners.entity_event_save import EntityEventSaveListener
 from app.core.application.services.file import FileOptimizeService
 from app.infrastructure.database.providers import DatabaseInjectionsProvider
 from app.infrastructure.producer.file import FileCompressMessage
@@ -30,7 +30,7 @@ async def compress_file(data: FileCompressMessage) -> None:
 
 @asynccontextmanager
 async def lifespan() -> AsyncIterator:
-    container.get(EntityEventService)
+    container.get(EntityEventSaveListener)
     yield
     container.close()
 

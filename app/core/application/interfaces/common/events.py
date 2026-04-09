@@ -7,7 +7,7 @@ from app.core.models.entity_event import EntityEvent, EntityEventAllSubjects, En
 
 class IEntityEventBus(Protocol):
     @abstractmethod
-    async def publish(self, event: EntityEvent) -> None: ...
+    async def publish(self, *events: EntityEvent) -> None: ...
 
     @abstractmethod
     def subscribe(

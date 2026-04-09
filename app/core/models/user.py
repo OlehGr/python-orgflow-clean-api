@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.exceptions.validation import ConflictError
-from app.core.models.base import EntityDto, EntityModel
+from app.core.models.entity import EntityDto, EntityModel
 from app.core.models.entity_event import EntityEvent, EntityEventEntity, EntityEventSubject
 
 
@@ -25,7 +25,7 @@ class UserModel(EntityModel):
     @classmethod
     def create(cls, *, name: str, email: str, password: str) -> "UserModel":
         password_hash = cls.hash_password(password)
-        return cls(
+        entity = cls(
             **cls._generate_base_args(),
             name=name,
             email=email,
@@ -34,15 +34,21 @@ class UserModel(EntityModel):
             is_active=True,
             avatar_file_id=None,
         )
+        entity.add_events(entity.to_entity_subject_event(EntityEventSubject.user_create))
+        return entity
 
-    def update(self, *, name: str) -> None:
+    def update(self, *, name: str, actor_id: uuid.UUID | None = None) -> None:
         self.name = name
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.user_update, actor_id=actor_id))
 
-    def confirm_user_email(self, email: str | None = None) -> None:
-        self.is_confirmed = True
+    def confirm_user_email(self, email: str | None = None, *, actor_id: uuid.UUID | None = None) -> None:
+        if not self.is_confirmed:
+            self.is_confirmed = True
 
         if email:
             self.email = email
+
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.user_update, actor_id=actor_id))
 
     def verify_password(self, password: str) -> None:
         password_valid = bcrypt.checkpw(password.encode("utf-8"), self.password_hash.encode("utf-8"))
@@ -50,9 +56,13 @@ class UserModel(EntityModel):
         if not password_valid:
             raise ConflictError("Неверный логин или пароль")
 
-    def reset_password(self, new_password: str) -> None:
+    def reset_password(self, new_password: str, *, actor_id: uuid.UUID | None = None) -> None:
         password_hash = self.hash_password(new_password)
         self.password_hash = password_hash
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.user_update, actor_id=actor_id))
+
+    def delete(self, *, actor_id: uuid.UUID | None = None) -> None:
+        self.add_events(self.to_entity_subject_event(EntityEventSubject.user_delete, actor_id=actor_id))
 
     @classmethod
     def hash_password(cls, password: str) -> str:
@@ -72,22 +82,16 @@ class UserModel(EntityModel):
         if not content_type.lower().startswith("image/"):
             raise ConflictError("Аватар пользователя должна быть картинка")
 
-    def to_entity_subject_event(self, subject: EntityEventSubject) -> EntityEvent["UserEventDto"]:
+    def to_entity_subject_event(
+        self, subject: EntityEventSubject, *, actor_id: uuid.UUID | None = None
+    ) -> EntityEvent["UserEventDto"]:
         return EntityEvent(
-            producer_id=None,
+            producer_id=actor_id,
             subject=subject,
             entity=EntityEventEntity.user,
             entity_id=self.id,
             data=UserEventDto.from_user(self),
         )
-
-    def to_entity_save_event(self) -> EntityEvent["UserEventDto"]:
-        return self.to_entity_subject_event(
-            self._resolve_entity_save_subject(EntityEventSubject.user_create, EntityEventSubject.user_update)
-        )
-
-    def to_entity_delete_event(self) -> EntityEvent["UserEventDto"]:
-        return self.to_entity_subject_event(EntityEventSubject.user_delete)
 
 
 class UserEventDto(EntityDto, frozen=True):

@@ -15,7 +15,11 @@ class InMemoryEntityEventBus(IEntityEventBus):
         self._handlers = {"*": []}
         self._background_executor = background_executor
 
-    async def publish(self, event: EntityEvent) -> None:
+    async def publish(self, *events: EntityEvent) -> None:
+        for event in events:
+            self._publish_event(event)
+
+    def _publish_event(self, event: EntityEvent) -> None:
         for handler in self._handlers["*"]:
             self._background_executor.submit(handler(event))
 
