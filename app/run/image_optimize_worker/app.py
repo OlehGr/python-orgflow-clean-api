@@ -6,9 +6,9 @@ from faststream import FastStream
 from faststream.rabbit import RabbitBroker
 
 from app.core.application.listeners.entity_event_save import EntityEventSaveListener
-from app.core.application.services.file import FileOptimizeService
+from app.core.application.services.file import ImageOptimizeService
 from app.infrastructure.database.providers import DatabaseInjectionsProvider
-from app.infrastructure.producer.file import FileCompressMessage
+from app.infrastructure.producer.file import FileIdMessage
 from app.infrastructure.rabbit.broker import RabbitInjectionsProvider
 from app.run.shared.providers import BaseRequiredInjectionsProvider
 from .providers import AppInjectionsProvider
@@ -22,10 +22,10 @@ container = make_container(
 broker = container.get(RabbitBroker)
 
 
-@broker.subscriber("file-compress")
-async def compress_file(data: FileCompressMessage) -> None:
-    file_optimize_service = container.get(FileOptimizeService)
-    await file_optimize_service.compress_file(data.file_id)
+@broker.subscriber("image-optimize")
+async def compress_file(data: FileIdMessage) -> None:
+    image_optimize_service = container.get(ImageOptimizeService)
+    await image_optimize_service.compress_file(data.file_id)
 
 
 @asynccontextmanager

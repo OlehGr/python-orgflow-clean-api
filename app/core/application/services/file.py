@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from app.core.application.dto.file import FileCreateStreamData, FileUploadData, FileUploadStreamData
 from app.core.application.interfaces.managers.transaction import ITransactionManager
-from app.core.application.interfaces.producer.file import IFileCompressProducer
+from app.core.application.interfaces.producer.file import IImageOptimizeProducer
 from app.core.application.interfaces.repository.file import IFileRepository
 from app.core.application.interfaces.services.file import IFileStorage, IImageCompressor, IImageHasher
 from app.core.models import FileModel
@@ -14,7 +14,7 @@ class FileService:
     _tm: ITransactionManager
     _file_storage: IFileStorage
     _file_repository: IFileRepository
-    _file_compress_producer: IFileCompressProducer
+    _image_optimize_producer: IImageOptimizeProducer
 
     async def create_file_from_stream(self, data: FileCreateStreamData, *, actor_id: uuid.UUID) -> uuid.UUID:
         file_id = uuid.uuid4()
@@ -40,13 +40,13 @@ class FileService:
 
         async with self._tm.transaction() as tx:
             await self._file_repository.save(file)
-            tx.add_async_after_commit(lambda: self._file_compress_producer.send(file.id))
+            tx.add_async_after_commit(lambda: self._image_optimize_producer.send(file.id))
 
         return file.id
 
 
 @dataclass
-class FileOptimizeService:
+class ImageOptimizeService:
     _image_optimizer: IImageCompressor
     _image_hasher: IImageHasher
     _file_storage: IFileStorage

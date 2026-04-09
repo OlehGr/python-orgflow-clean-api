@@ -2,6 +2,8 @@ import uuid
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 
+import msgspec
+
 from app.core.models import FileModel
 from app.core.models.entity import EntityDto
 
@@ -62,3 +64,7 @@ class ImageCompressResult:
     optimized_data: bytes
     content_type: str
     file_name: str
+
+
+class FileIdMessage(msgspec.Struct, frozen=True):
+    file_id: uuid.UUID

@@ -11,7 +11,7 @@ RUN uv python install 3.13
 WORKDIR /app
 COPY pyproject.toml .
 COPY uv.lock .
-RUN uv sync --no-editable --locked --only-group file-compress-worker
+RUN uv sync --no-editable --locked --only-group image-optimize-worker
 
 
 FROM alpine:3.23
@@ -24,4 +24,4 @@ COPY . .
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-ENTRYPOINT ["python", "-m", "faststream", "run", "app.run.file_compress_worker.app:app"]
+ENTRYPOINT ["python", "-m", "faststream", "run", "app.run.image_optimize_worker.app:app"]

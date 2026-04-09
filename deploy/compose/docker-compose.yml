@@ -36,10 +36,10 @@ services:
       S3_SECRET_KEY: minio123
       S3_BUCKET: some-bucket
 
-  file-worker:
+  image-optimize-worker:
     build:
       context: ../../
-      dockerfile: ./deploy/file-compress-worker.Dockerfile
+      dockerfile: ./deploy/image-optimize-worker.Dockerfile
     restart: unless-stopped
     networks:
       - web

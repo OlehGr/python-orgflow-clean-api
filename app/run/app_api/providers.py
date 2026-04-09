@@ -1,6 +1,6 @@
 from dishka import Provider, Scope, provide
 
-from app.core.application.interfaces.producer.file import IFileCompressProducer
+from app.core.application.interfaces.producer.file import IImageOptimizeProducer
 from app.core.application.interfaces.projection.organization import (
     IOrganizationProjection,
     IOrganizationSettingsProjection,
@@ -32,7 +32,7 @@ from app.infrastructure.database.repository.organization import OrganizationRepo
 from app.infrastructure.database.repository.organization_member import OrganizationMemberRepository
 from app.infrastructure.database.repository.project import ProjectRepository
 from app.infrastructure.database.repository.user import UserRepository
-from app.infrastructure.producer.file import RabbitFileCompressProducer
+from app.infrastructure.producer.file import ImageOptimizeRabbitProducer
 from app.infrastructure.services.email.local import LoggerEmailService
 from app.infrastructure.services.email.smtp import SmtpEmailService
 from app.infrastructure.services.files.s3 import S3FileStorage
@@ -54,7 +54,7 @@ class AppInjectionsProvider(Provider):
 
     file_repository = provide(FileRepository, provides=IFileRepository)
     file_storage = provide(S3FileStorage, provides=IFileStorage)
-    file_compress_producer = provide(RabbitFileCompressProducer, provides=IFileCompressProducer)
+    image_optimize_producer = provide(ImageOptimizeRabbitProducer, provides=IImageOptimizeProducer)
     file_service = provide(FileService)
 
     organization_repository = provide(OrganizationRepository, provides=IOrganizationRepository)
