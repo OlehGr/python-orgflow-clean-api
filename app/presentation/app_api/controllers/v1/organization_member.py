@@ -88,22 +88,22 @@ class OrganizationMemberController(Controller):
         )
         return await organization_member_projection.get_by_id(organization_member_id, actor_id=None)
 
-    @delete("/{organization_id:uuid}", status_code=HTTP_204_NO_CONTENT)
+    @delete("/{organization_member_id:uuid}", status_code=HTTP_204_NO_CONTENT)
     @inject
     async def delete(
         self,
         organization_member_service: FromDishka[OrganizationMemberService],
         request: Request,
-        organization_id: uuid.UUID,
+        organization_member_id: uuid.UUID,
     ) -> None:
-        await organization_member_service.delete_organization_member(organization_id, actor_id=request.user)
+        await organization_member_service.delete_organization_member(organization_member_id, actor_id=request.user)
 
-    @get("/{organization_id:uuid}", status_code=HTTP_200_OK)
+    @get("/{organization_member_id:uuid}", status_code=HTTP_200_OK)
     @inject
     async def get_by_id(
         self,
         organization_member_projection: FromDishka[IOrganizationMemberProjection],
         request: Request,
-        organization_id: uuid.UUID,
+        organization_member_id: uuid.UUID,
     ) -> OrganizationMemberReadDto:
-        return await organization_member_projection.get_by_id(organization_id, actor_id=request.user)
+        return await organization_member_projection.get_by_id(organization_member_id, actor_id=request.user)
